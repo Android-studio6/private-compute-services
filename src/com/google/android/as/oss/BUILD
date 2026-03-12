@@ -23,11 +23,13 @@ pcs_dev_and_mpm(
     manifest = "AndroidManifest.xml",
     resource_files = glob(["res/**"]),
     deps = [
+        "//src/com/google/android/as/oss/actionlauncher:prod_modules",  # buildcleaner: keep
         "//src/com/google/android/as/oss/ai/config/impl",  # buildcleaner: keep
         "//src/com/google/android/as/oss/ai/service",  # buildcleaner: keep
         "//src/com/google/android/as/oss/attestation/config/impl",  # buildcleaner: keep
         "//src/com/google/android/as/oss/attestation/impl:impl_module",  # buildcleaner: keep
         "//src/com/google/android/as/oss/attestation/jobs",  # buildcleaner: keep
+        "//src/com/google/android/as/oss/availability:prod_modules",  # buildcleaner: keep
         "//src/com/google/android/as/oss/common:annotation",
         "//src/com/google/android/as/oss/common/broadcastreceivers:boot_completed_broadcast_receiver",  # buildcleaner: keep
         "//src/com/google/android/as/oss/common/config/impl:flags_impl",

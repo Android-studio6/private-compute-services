@@ -12,20 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2024";
+edition = "2023";
 
-package com.google.android.as.oss.feedback.api;
+package com.google.android.as.oss.availability.api;
 
-option java_outer_classname = "FeedbackDialogCommonDataOuterClass";
-option java_package = "com.google.android.as.oss.feedback.api";
+import "src/com/google/android/as/oss/availability/api/feature_availability_service_is_feature_available.proto";
 
-message FeedbackDialogCommonData {
-  // Label shown when donation data can't be fetched.
-  string donation_data_failure_label = 1;
+option java_package = "com.google.android.as.oss.availability.api";
+option java_multiple_files = true;
 
-  // Button text shown when donation data can't be fetched.
-  string donation_data_failure_button_text = 2;
-
-  // Back button content description when donation data can't be fetched.
-  string donation_data_failure_back_button_content_description = 3;
+// Service to check availability of a feature.
+service FeatureAvailabilityService {
+  // Check if a feature is available.
+  rpc IsFeatureAvailable(FeatureAvailabilityRequest)
+      returns (FeatureAvailabilityResponse) {
+    option deadline = 5.0;
+  }
 }
