@@ -54,6 +54,7 @@ proto_library(
     has_services = True,
     deps = [
         "",
+        "//src/com/google/android/as/oss/protos:pcs_feature_enum_proto",
         "//third_party/fcp/client:selector_context_proto",
     ],
 )

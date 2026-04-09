@@ -30,33 +30,31 @@ data class DeviceInfo(
   companion object {
     private val logger = GoogleLogger.forEnclosingClass()
 
-    fun PcsVersionInterceptor(deviceInfo: DeviceInfo?) =
-      deviceInfo?.let {
-        newAttachHeadersInterceptor(
-          /*extraHeaders=*/ Metadata().apply {
-            deviceInfo.appVersionName?.let { appVersionName ->
-              logger.atFine().log("Adding app version name: %s", appVersionName)
-              put(APP_VERSION_NAME_HEADER, appVersionName)
-            }
-            deviceInfo.appVersionCode?.let { appVersionCode ->
-              logger.atFine().log("Adding app version code: %s", appVersionCode)
-              put(APP_VERSION_CODE_HEADER, appVersionCode)
-            }
+    fun PcsVersionInterceptor(deviceInfo: DeviceInfo?) = deviceInfo?.let {
+      newAttachHeadersInterceptor(
+        /*extraHeaders=*/ Metadata().apply {
+          deviceInfo.appVersionName?.let { appVersionName ->
+            logger.atFine().log("Adding app version name: %s", appVersionName)
+            put(APP_VERSION_NAME_HEADER, appVersionName)
           }
-        )
-      }
+          deviceInfo.appVersionCode?.let { appVersionCode ->
+            logger.atFine().log("Adding app version code: %s", appVersionCode)
+            put(APP_VERSION_CODE_HEADER, appVersionCode)
+          }
+        }
+      )
+    }
 
-    fun HardwareRevisionInterceptor(deviceInfo: DeviceInfo?) =
-      deviceInfo?.let {
-        newAttachHeadersInterceptor(
-          /*extraHeaders=*/ Metadata().apply {
-            deviceInfo.hardwareRevision?.let { hardwareRevision ->
-              logger.atFine().log("Adding hardware revision: %s", hardwareRevision)
-              put(HARDWARE_REVISION_HEADER, hardwareRevision)
-            }
+    fun HardwareRevisionInterceptor(deviceInfo: DeviceInfo?) = deviceInfo?.let {
+      newAttachHeadersInterceptor(
+        /*extraHeaders=*/ Metadata().apply {
+          deviceInfo.hardwareRevision?.let { hardwareRevision ->
+            logger.atFine().log("Adding hardware revision: %s", hardwareRevision)
+            put(HARDWARE_REVISION_HEADER, hardwareRevision)
           }
-        )
-      }
+        }
+      )
+    }
 
     private val APP_VERSION_NAME_HEADER: Metadata.Key<String> =
       Metadata.Key.of("X-App-Version-Name", Metadata.ASCII_STRING_MARSHALLER)

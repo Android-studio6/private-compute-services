@@ -16,10 +16,12 @@
 
 package com.google.android.as.oss.fl.server;
 
+import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.FC_TRAINING_START_QUERY;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.util.concurrent.Futures.immediateFailedFuture;
 
 import android.content.Context;
+import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
 import com.google.android.as.oss.fl.api.proto.ClientStreamMessage;
 import com.google.android.as.oss.fl.api.proto.GetDataRequest;
 import com.google.android.as.oss.fl.api.proto.GetDataResponse;
@@ -28,6 +30,7 @@ import com.google.android.as.oss.fl.api.proto.ServiceStreamMessage;
 import com.google.android.as.oss.fl.api.proto.UploadFinishedResponse;
 import com.google.android.as.oss.fl.api.proto.UploadOutcome;
 import com.google.android.as.oss.fl.api.proto.UploadRequest;
+import com.google.android.as.oss.fl.fc.service.scheduler.Annotations.PrivateLoggerFcpInvoker;
 import com.google.android.as.oss.fl.fc.service.scheduler.FcpContributionResultInfo;
 import com.google.android.as.oss.fl.fc.service.scheduler.FcpInvocation;
 import com.google.android.as.oss.fl.fc.service.scheduler.FcpInvocationCallback;
@@ -35,7 +38,10 @@ import com.google.android.as.oss.fl.fc.service.scheduler.FcpInvocationOptions;
 import com.google.android.as.oss.fl.fc.service.scheduler.FcpLoggerInvoker;
 import com.google.android.as.oss.fl.fc.service.scheduler.endorsementoptions.EndorsementClientType;
 import com.google.android.as.oss.fl.fc.service.scheduler.endorsementoptions.EndorsementOptionsProvider;
+import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
+import com.google.android.as.oss.networkusage.db.NetworkUsageLogUtils;
 import com.google.fcp.client.tasks.Task;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.GoogleLogger;
 import com.google.common.util.concurrent.SettableFuture;
@@ -43,6 +49,7 @@ import com.google.errorprone.annotations.concurrent.GuardedBy;
 import com.google.fcp.client.privatelogger.LogEntry;
 import com.google.fcp.client.privatelogger.impl.DataProvider;
 import com.google.intelligence.fcp.confidentialcompute.AccessPolicyEndorsementOptions;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import java.util.ArrayList;
@@ -74,24 +81,36 @@ public class PrivateLoggerGrpcBindableService
   private final ExecutorService executorService;
   private final Context context;
   private final FcpLoggerInvoker fcpLoggerInvoker;
+  private final NetworkUsageLogRepository networkUsageLogRepository;
+  private final CallingPackageNameProvider callingPackageNameProvider;
 
   @Inject
   PrivateLoggerGrpcBindableService(
       EndorsementOptionsProvider endorsementOptionsProvider,
       ScheduledExecutorService executorService,
       Context context,
-      FcpLoggerInvoker fcpLoggerInvoker) {
+      FcpLoggerInvoker fcpLoggerInvoker,
+      NetworkUsageLogRepository networkUsageLogRepository,
+      CallingPackageNameProvider callingPackageNameProvider) {
     this.endorsementOptionsProvider = endorsementOptionsProvider;
     this.executorService = executorService;
     this.context = context;
     this.fcpLoggerInvoker = fcpLoggerInvoker;
+    this.networkUsageLogRepository = networkUsageLogRepository;
+    this.callingPackageNameProvider = callingPackageNameProvider;
   }
 
   @Override
   public StreamObserver<ClientStreamMessage> upload(
       StreamObserver<ServiceStreamMessage> responseObserver) {
     return new UploadStreamObserver(
-        context, endorsementOptionsProvider, executorService, responseObserver, fcpLoggerInvoker);
+        context,
+        endorsementOptionsProvider,
+        executorService,
+        responseObserver,
+        fcpLoggerInvoker,
+        networkUsageLogRepository,
+        callingPackageNameProvider);
   }
 
   /**
@@ -138,6 +157,8 @@ public class PrivateLoggerGrpcBindableService
     private final ExecutorService executorService;
     private final StreamObserver<ServiceStreamMessage> responseObserver;
     private final FcpLoggerInvoker fcpLoggerInvoker;
+    private final NetworkUsageLogRepository networkUsageLogRepository;
+    private final CallingPackageNameProvider callingPackageNameProvider;
 
     /**
      * Holds the future for a pending {@code getData} request.
@@ -162,12 +183,16 @@ public class PrivateLoggerGrpcBindableService
         EndorsementOptionsProvider endorsementOptionsProvider,
         ExecutorService executorService,
         StreamObserver<ServiceStreamMessage> responseObserver,
-        FcpLoggerInvoker fcpLoggerInvoker) {
+        FcpLoggerInvoker fcpLoggerInvoker,
+        NetworkUsageLogRepository networkUsageLogRepository,
+        CallingPackageNameProvider callingPackageNameProvider) {
       this.context = context;
       this.endorsementOptionsProvider = endorsementOptionsProvider;
       this.executorService = executorService;
       this.responseObserver = responseObserver;
       this.fcpLoggerInvoker = fcpLoggerInvoker;
+      this.networkUsageLogRepository = networkUsageLogRepository;
+      this.callingPackageNameProvider = callingPackageNameProvider;
     }
 
     @Override
@@ -254,8 +279,54 @@ public class PrivateLoggerGrpcBindableService
     }
 
     private void handleUploadRequest(UploadRequest request) {
+      String featureName = request.getFeatureName().name();
+      String callingPackageName = callingPackageNameProvider.getCallingPackageName(context);
+      // If there is no mapping in the network usage log repository for this feature and this
+      // connection type, then this egress is not allowed.
+      if (networkUsageLogRepository.shouldRejectRequest(FC_TRAINING_START_QUERY, featureName)) {
+        synchronized (lock) {
+          state = State.DONE;
+        }
+        responseObserver.onError(
+            Status.PERMISSION_DENIED
+                .withDescription(String.format("Not allowed to egress for '%s'", featureName))
+                .asRuntimeException());
+        return;
+      }
       DataProvider grpcDataProvider =
           selectorContext -> {
+            if (!selectorContext
+                .getComputationProperties()
+                .getFederated()
+                .hasConfidentialAggregation()) {
+              synchronized (lock) {
+                state = State.DONE;
+              }
+              String errorMessage =
+                  "Incorrectly configured computation attempted to read from PrivateLogger. All "
+                      + "computations reading from a PrivateLogger must use confidential "
+                      + "aggregation.";
+              responseObserver.onError(
+                  Status.FAILED_PRECONDITION.withDescription(errorMessage).asRuntimeException());
+              return immediateFailedFuture(new IllegalStateException(errorMessage));
+            }
+            // Allowed to upload, so add to the network usage log before proceeding.
+            if (networkUsageLogRepository.isNetworkUsageLogEnabled()) {
+              networkUsageLogRepository
+                  .getDbExecutor()
+                  .ifPresent(
+                      executor ->
+                          executor.execute(
+                              () ->
+                                  networkUsageLogRepository.insertNetworkUsageEntity(
+                                      NetworkUsageLogUtils
+                                          .createFcTrainingStartQueryNetworkUsageEntity(
+                                              NetworkUsageLogUtils
+                                                  .createFcTrainingStartQueryConnectionDetails(
+                                                      featureName, callingPackageName),
+                                              selectorContext.getComputationProperties().getRunId(),
+                                              Optional.absent() /* policyProto */))));
+            }
             synchronized (lock) {
               // If FCP calls this DataProvider after the RPC session was cancelled and transitioned
               // to DONE (e.g. via onError()), we must not call responseObserver.onNext(), as the

@@ -19,6 +19,7 @@ package(default_visibility = ["//visibility:public"])
 android_library(
     name = "config_impl",
     srcs = ["PcsFcDeviceConfigFlags.java"],
+    manifest = "AndroidManifest.xml",
     deps = [
         "//experiments/proto:typed_features_java_proto_lite",
         "//src/com/google/android/as/oss/common/config",

@@ -26,6 +26,7 @@ package(
 proto_library(
     name = "templates_proto",
     srcs = ["template_integration.proto"],
+    option_deps = ["//third_party/protobuf:cpp_features_proto"],
     deps = [
         "//src/com/google/android/as/oss/delegatedui/api/integration/templates/airflow:airflow_template_proto",
         "//src/com/google/android/as/oss/delegatedui/api/integration/templates/beacon:beacon_template_proto",

@@ -17,6 +17,7 @@
 package com.google.android.`as`.oss.privateinference.transport.impl
 
 import android.content.Context
+import android.net.http.ExportedFlags.proxyApis
 import android.os.Build
 import androidx.annotation.RequiresExtension
 import com.google.android.`as`.oss.common.ExecutorAnnotations.PiExecutorQualifier
@@ -32,12 +33,14 @@ import com.google.android.`as`.oss.privateinference.library.bsa.token.ProxyToken
 import com.google.android.`as`.oss.privateinference.library.oakutil.PrivateInferenceClientTimerNames
 import com.google.android.`as`.oss.privateinference.logging.MetricIdMap
 import com.google.android.`as`.oss.privateinference.logging.PcsStatsLogger
+import com.google.android.`as`.oss.privateinference.transport.IpRelayFallbackFlag
 import com.google.android.`as`.oss.privateinference.transport.ManagedChannelFactory
 import com.google.android.`as`.oss.privateinference.transport.ProxyConfigManager
 import com.google.android.`as`.oss.privateinference.transport.ProxyConfiguration
 import com.google.android.`as`.oss.privateinference.transport.TransportConstants.HTTPS_PORT
 import com.google.android.`as`.oss.privateinference.transport.TransportConstants.MAX_INBOUND_MESSAGE_SIZE_BYTES
 import com.google.android.`as`.oss.privateinference.transport.TransportFlag
+import com.google.android.`as`.oss.privateinference.transport.unusable.UnusableManagedChannel
 import com.google.android.`as`.oss.privateinference.util.timers.Annotations.PrivateInferenceClientTimers
 import com.google.android.`as`.oss.privateinference.util.timers.TimerSet
 import com.google.android.`as`.oss.privateinference.util.timers.Timers
@@ -71,6 +74,7 @@ constructor(
   @PiServerChannelIdleTimeoutMinutes private val channelIdleTimeoutMinutes: Long,
   @PrivateInferenceProxyConfiguration private val proxyConfigManager: Optional<ProxyConfigManager>,
   private val transportFlag: TransportFlag,
+  private val ipRelayFallbackFlag: IpRelayFallbackFlag,
   private val bsaProxyTokenProvider: BsaTokenProvider<@JvmSuppressWildcards ProxyToken>,
   @PiExecutorQualifier private val backgroundExecutor: ListeningExecutorService,
   @param:PrivateInferenceClientTimers private val timers: TimerSet,
@@ -85,56 +89,144 @@ constructor(
     return getManagedChannelInstance()
   }
 
-  private suspend fun getManagedChannelInstance(): ManagedChannel =
-    mutex.withLock { managedChannelInstance ?: create().also { managedChannelInstance = it } }
+  private suspend fun getManagedChannelInstance(): ManagedChannel = mutex.withLock {
+    managedChannelInstance ?: create().also { managedChannelInstance = it }
+  }
 
   private suspend fun create(): ManagedChannel {
+    val mode = transportFlag.mode()
     logger
       .atInfo()
       .log(
         "Creating gRPC channel for Private Inference server at %s with transport mode %s",
         endpointUrl,
-        transportFlag.mode(),
+        mode,
       )
+
+    val isIpRelayMode =
+      mode == TransportFlag.Mode.CRONET_MAINLINE_IP_RELAY ||
+        mode == TransportFlag.Mode.CRONET_STATIC_IP_RELAY
+
+    val proxyConfig =
+      if (isIpRelayMode) {
+        val config = proxyConfigManager.orElse(null)?.getProxyConfig() ?: emptyList()
+        if (config.isEmpty()) {
+          logger
+            .atWarning()
+            .log("Proxy configuration is empty for %s. Returning UnusableManagedChannel.", mode)
+          return UnusableManagedChannel("Proxy configuration is empty for $mode")
+        }
+        config
+      } else {
+        emptyList()
+      }
+
     val managedChannelBuilder: ManagedChannelBuilder<*> =
-      when (transportFlag.mode()) {
+      when (mode) {
         TransportFlag.Mode.OK_HTTP -> OkHttpChannelBuilder.forAddress(endpointUrl, HTTPS_PORT)
         TransportFlag.Mode.CRONET_MAINLINE -> {
           val engine = HttpEngineNativeProvider(context).createBuilder().build()
           CronetChannelBuilder.forAddress(endpointUrl, HTTPS_PORT, engine)
         }
+        TransportFlag.Mode.CRONET_MAINLINE_IP_RELAY ->
+          when {
+            ipRelayFallbackFlag.mode == IpRelayFallbackFlag.Mode.FORCE_STATIC -> {
+              logger
+                .atInfo()
+                .log(
+                  "Forcing CRONET_STATIC_IP_RELAY for IP relay support due to experiment override."
+                )
+              createIpRelayChannelBuilder(CronetProviderType.STATIC, proxyConfig = proxyConfig)
+            }
+            !proxyApis() -> {
+              logger
+                .atInfo()
+                .log(
+                  "Falling back to CRONET_STATIC_IP_RELAY for IP relay support as Proxy APIs are not available."
+                )
+              createIpRelayChannelBuilder(CronetProviderType.STATIC, proxyConfig = proxyConfig)
+            }
+            else ->
+              createIpRelayChannelBuilder(
+                CronetProviderType.MAINLINE,
+                fallbackOnError = true,
+                proxyConfig = proxyConfig,
+              )
+          }
         TransportFlag.Mode.CRONET_STATIC -> {
           val engine = NativeCronetProvider(context).createBuilder().build()
           CronetChannelBuilder.forAddress(endpointUrl, HTTPS_PORT, engine)
         }
-        TransportFlag.Mode.CRONET_STATIC_IP_RELAY -> {
-          val engineBuilder = NativeCronetProvider(context).createBuilder()
-          if (proxyConfigManager.isPresent) {
-            val proxyConfig = proxyConfigManager.get().getProxyConfig()
-            logger.atInfo().log("Setting proxy options: %s", proxyConfig.toLogString)
-            engineBuilder.setProxyOptions(
-              ProxyOptions.fromProxyList(
-                proxyConfig.map { config ->
-                  Proxy.createHttpProxy(
-                    Proxy.SCHEME_HTTPS,
-                    config.host,
-                    config.port,
-                    // Executor where proxy callbacks will be invoked.
-                    { r -> r.run() },
-                    getProxyCallback(config),
-                  )
-                }
-              )
-            )
-          }
-          CronetChannelBuilder.forAddress(endpointUrl, HTTPS_PORT, engineBuilder.build())
-        }
+        TransportFlag.Mode.CRONET_STATIC_IP_RELAY ->
+          createIpRelayChannelBuilder(CronetProviderType.STATIC, proxyConfig = proxyConfig)
         else -> ManagedChannelBuilder.forTarget(endpointUrl)
       }
     return managedChannelBuilder
       .maxInboundMessageSize(MAX_INBOUND_MESSAGE_SIZE_BYTES)
       .idleTimeout(channelIdleTimeoutMinutes, TimeUnit.MINUTES)
       .build()
+  }
+
+  private enum class CronetProviderType(
+    val metricId: CountMetricId,
+    val builderFactory: (Context) -> org.chromium.net.CronetEngine.Builder,
+  ) {
+    MAINLINE(
+      CountMetricId.PCS_PI_CRONET_MAINLINE_LIB_USAGE,
+      { context -> HttpEngineNativeProvider(context).createBuilder() },
+    ),
+    STATIC(
+      CountMetricId.PCS_PI_CRONET_NATIVE_LIB_USAGE,
+      { context -> NativeCronetProvider(context).createBuilder() },
+    ),
+  }
+
+  private suspend fun createIpRelayChannelBuilder(
+    providerType: CronetProviderType,
+    fallbackOnError: Boolean = false,
+    proxyConfig: List<ProxyConfiguration>,
+  ): CronetChannelBuilder {
+    return try {
+      val engineBuilder = providerType.builderFactory(context)
+      engineBuilder.applyProxyConfig(proxyConfig)
+      pcsStatsLogger.logEventCount(providerType.metricId)
+      CronetChannelBuilder.forAddress(endpointUrl, HTTPS_PORT, engineBuilder.build())
+    } catch (e: UnsupportedOperationException) {
+      if (fallbackOnError) {
+        logger
+          .atInfo()
+          .log(
+            "Falling back to CRONET_STATIC_IP_RELAY for IP relay support as Proxy APIs are not available."
+          )
+        createIpRelayChannelBuilder(
+          CronetProviderType.STATIC,
+          fallbackOnError = false,
+          proxyConfig = proxyConfig,
+        )
+      } else {
+        throw e
+      }
+    }
+  }
+
+  private suspend fun org.chromium.net.CronetEngine.Builder.applyProxyConfig(
+    proxyConfig: List<ProxyConfiguration>
+  ) {
+    logger.atInfo().log("Setting proxy options: %s", proxyConfig.toLogString)
+    setProxyOptions(
+      ProxyOptions.fromProxyList(
+        proxyConfig.map { config ->
+          Proxy.createHttpProxy(
+            Proxy.SCHEME_HTTPS,
+            config.host,
+            config.port,
+            // Executor where proxy callbacks will be invoked.
+            { r -> r.run() },
+            getProxyCallback(config),
+          )
+        }
+      )
+    )
   }
 
   private val List<ProxyConfiguration>.toLogString: String

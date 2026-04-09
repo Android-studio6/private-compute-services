@@ -467,7 +467,7 @@ public final class PcsExampleStoreService extends Hilt_PcsExampleStoreService {
                           NetworkUsageLogUtils.createFcTrainingStartQueryConnectionDetails(
                               query.getFeatureName().name(), query.getClientName()),
                           runId,
-                          query.getPolicy())));
+                          Optional.of(query.getPolicy()))));
     }
   }
 }

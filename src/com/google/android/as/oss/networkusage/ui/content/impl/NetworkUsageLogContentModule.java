@@ -297,6 +297,42 @@ abstract class NetworkUsageLogContentModule {
                 .descriptionId(R.string.description_pi_memory_generation)
                 .build(),
             piEntryBuilder
+                .packageName(PSI_PACKAGE_NAME)
+                .connectionKeyString(
+                    PcsPrivateInferenceFeatureName.FEATURE_NAME_PSI_MINI_RESPONSE_GENERATION.name())
+                .featureNameId(R.string.feature_name_pi_mini_response_generation)
+                .descriptionId(R.string.description_pi_response_generation)
+                .build(),
+            piEntryBuilder
+                .packageName(PSI_PACKAGE_NAME)
+                .connectionKeyString(
+                    PcsPrivateInferenceFeatureName.FEATURE_NAME_PSI_RESPONSE_GENERATION.name())
+                .featureNameId(R.string.feature_name_pi_response_generation)
+                .descriptionId(R.string.description_pi_response_generation)
+                .build(),
+            piEntryBuilder
+                .packageName(PSI_PACKAGE_NAME)
+                .connectionKeyString(
+                    PcsPrivateInferenceFeatureName.FEATURE_NAME_PSI_SCREENSHOT_MEMORY_GENERATION
+                        .name())
+                .featureNameId(R.string.feature_name_pi_screenshot_memory_generation)
+                .descriptionId(R.string.description_pi_screenshot_memory_generation)
+                .build(),
+            piEntryBuilder
+                .packageName(AICORE_PACKAGE_NAME)
+                .connectionKeyString(
+                PcsPrivateInferenceFeatureName.FEATURE_NAME_SCREENSHOTS_MEMORY_GENERATION.name())
+                .featureNameId(R.string.feature_name_screenshots_memory_generation)
+                .descriptionId(R.string.description_pi_screenshots_memory_generation)
+                .build(),
+            piEntryBuilder
+                .packageName(AICORE_PACKAGE_NAME)
+                .connectionKeyString(
+                PcsPrivateInferenceFeatureName.FEATURE_NAME_SCREENSHOTS_RESPONSE_GENERATION.name())
+                .featureNameId(R.string.feature_name_screenshots_response_generation)
+                .descriptionId(R.string.description_pi_screenshots_response_generation)
+                .build(),
+            piEntryBuilder
                 .packageName(PCS_PACKAGE_NAME)
                 .connectionKeyString(IPProtectionRequestType.IPP_GET_PROXY_CONFIG.name())
                 .featureNameId(R.string.feature_name_ip_protection)

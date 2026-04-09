@@ -21,7 +21,8 @@ import option "third_party/java/protobuf/java_features.proto";
 option java_outer_classname = "PcsFeatureEnum";
 option java_package = "com.google.android.as.oss.proto";
 
-// Feature names for which Federated Training can be requested.
+// Feature names for which Federated Training or Private Logging can be
+// requested.
 enum FeatureName {
   option features.(pb.java).nest_in_file_class = YES;
 

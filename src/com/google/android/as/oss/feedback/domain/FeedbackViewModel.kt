@@ -214,76 +214,79 @@ constructor(
     quartzCuj: QuartzCUJ? = null,
   ) {
     loadDonationDataJob?.cancel()
-    loadDonationDataJob =
-      viewModelScope.launch {
-        _uiStateFlow.update { it.copy(feedbackDonationData = null) }
+    loadDonationDataJob = viewModelScope.launch {
+      _uiStateFlow.update { it.copy(feedbackDonationData = null) }
 
-        var blockViewDataV2ForNotification = false
-        if (loadSpoonData) {
-          val response =
-            feedbackDataServiceClient.getFeedbackDonationData(
-              clientSessionId = clientSessionId,
-              uiElementType = 0,
-              uiElementIndex = 0,
-            )
-          _uiStateFlow.update { it.copy(feedbackDonationData = response) }
-          blockViewDataV2ForNotification =
-            blockViewDataV2ForNotification or
-              !(response
-                .getOrNull()
-                ?.feedbackUiRenderingData
-                ?.feedbackViewDataCategoryTitles
-                ?.hasTriggeringMessagesTitle() ?: false)
-        }
+      var blockViewDataV2ForNotification = false
+      if (loadSpoonData) {
+        val response =
+          feedbackDataServiceClient.getFeedbackDonationData(
+            clientSessionId = clientSessionId,
+            uiElementType = 0,
+            uiElementIndex = 0,
+          )
+        _uiStateFlow.update { it.copy(feedbackDonationData = response) }
+        blockViewDataV2ForNotification =
+          blockViewDataV2ForNotification or
+            !(response
+              .getOrNull()
+              ?.feedbackUiRenderingData
+              ?.feedbackViewDataCategoryTitles
+              ?.hasTriggeringMessagesTitle() ?: false)
+      }
 
-        if (quartzCuj != null) {
-          val quartzResponse =
-            quartzFeedbackDataServiceClient.getFeedbackDonationData(
-              clientSessionId = clientSessionId,
-              uiElementType = 0,
-              uiElementIndex = 0,
-              quartzCuj = quartzCuj,
-            )
-          _uiStateFlow.update { it.copy(quartzFeedbackDonationData = quartzResponse) }
-          blockViewDataV2ForNotification =
-            blockViewDataV2ForNotification or
-              !(quartzResponse
-                .getOrNull()
-                ?.feedbackUiRenderingData
-                ?.feedbackViewDataCategoryTitles
-                ?.hasNotificationContentTitle() ?: false)
-          val defaultOptInChecked = _uiStateFlow.value.optInChecked.toMutableMap()
-          for (category in
-            configReader.config.dataCollectionCategoryDefaultOptIn[quartzCuj.name] ?: emptyList()) {
+      if (quartzCuj != null) {
+        val quartzResponse =
+          quartzFeedbackDataServiceClient.getFeedbackDonationData(
+            clientSessionId = clientSessionId,
+            uiElementType = 0,
+            uiElementIndex = 0,
+            quartzCuj = quartzCuj,
+          )
+        _uiStateFlow.update { it.copy(quartzFeedbackDonationData = quartzResponse) }
+        blockViewDataV2ForNotification =
+          blockViewDataV2ForNotification or
+            !(quartzResponse
+              .getOrNull()
+              ?.feedbackUiRenderingData
+              ?.feedbackViewDataCategoryTitles
+              ?.hasNotificationContentTitle() ?: false)
+        val defaultOptInChecked = _uiStateFlow.value.optInChecked.toMutableMap()
+        for (category in
+          configReader.config.dataCollectionCategoryDefaultOptIn[quartzCuj.name] ?: emptyList()) {
+          if (
+            (category == LegacyV1 && blockViewDataV2ForNotification) ||
+              (category != LegacyV1 && !blockViewDataV2ForNotification)
+          ) {
             defaultOptInChecked[category] = true
           }
-          _uiStateFlow.update { it.copy(optInChecked = defaultOptInChecked) }
         }
-        _uiStateFlow.update {
-          it.copy(enableViewDataDialogV2MultiEntity = !blockViewDataV2ForNotification)
-        }
+        _uiStateFlow.update { it.copy(optInChecked = defaultOptInChecked) }
       }
+      _uiStateFlow.update {
+        it.copy(enableViewDataDialogV2MultiEntity = !blockViewDataV2ForNotification)
+      }
+    }
   }
 
   fun submitFeedback(submissionDataList: List<FeedbackSubmissionData>) {
     submitFeedbackJob?.cancel()
-    submitFeedbackJob =
-      viewModelScope.launch {
-        _uiStateFlow.update { it.copy(feedbackSubmitStatus = FeedbackSubmitState.SUBMIT_PENDING) }
+    submitFeedbackJob = viewModelScope.launch {
+      _uiStateFlow.update { it.copy(feedbackSubmitStatus = FeedbackSubmitState.SUBMIT_PENDING) }
 
-        runCatching { executeSubmitFeedback(submissionDataList) }
-          .onSuccess { result -> _events.emit(result) }
-          .onFailure { e ->
-            logger
-              .atWarning()
-              .withCause(e)
-              .withStackTrace(StackSize.SMALL)
-              .log("FeedbackViewModel#submitFeedback failed with exception", e)
-            _events.emit(failureEvent())
-          }
+      runCatching { executeSubmitFeedback(submissionDataList) }
+        .onSuccess { result -> _events.emit(result) }
+        .onFailure { e ->
+          logger
+            .atWarning()
+            .withCause(e)
+            .withStackTrace(StackSize.SMALL)
+            .log("FeedbackViewModel#submitFeedback failed with exception", e)
+          _events.emit(failureEvent())
+        }
 
-        _uiStateFlow.update { it.copy(feedbackSubmitStatus = FeedbackSubmitState.SUBMIT_FINISHED) }
-      }
+      _uiStateFlow.update { it.copy(feedbackSubmitStatus = FeedbackSubmitState.SUBMIT_FINISHED) }
+    }
   }
 
   private suspend fun executeSubmitFeedback(

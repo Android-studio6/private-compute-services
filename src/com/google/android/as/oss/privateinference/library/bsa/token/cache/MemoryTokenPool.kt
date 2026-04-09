@@ -38,47 +38,45 @@ class MemoryTokenPool<T : BsaToken>(
     params: BsaTokenParams<T>,
     count: Int,
     fallbackSource: TokenPoolSource<T>,
-  ): List<T> =
-    lock.withLock {
-      val validPool = poolsByParams[params]?.filter(tokenValidityPredicate) ?: emptyList()
-      val result = validPool.take(count).toMutableList()
-      val newPool = validPool.drop(count).toMutableList()
+  ): List<T> = lock.withLock {
+    val validPool = poolsByParams[params]?.filter(tokenValidityPredicate) ?: emptyList()
+    val result = validPool.take(count).toMutableList()
+    val newPool = validPool.drop(count).toMutableList()
 
-      val remainingForResult = count - result.size
-      val refillAmount =
-        if (newPool.size < minPoolSize) {
-          // Only try to refill if the new pool will have dropped below the minimum pool size.
-          maxOf(preferredPoolSize - newPool.size, 0)
-        } else {
-          0
-        }
-
-      val toFetch = remainingForResult + refillAmount
-      if (toFetch > 0) {
-        val fetched = fallbackSource(params, toFetch, tokenValidityPredicate)
-        result.addAll(fetched.take(remainingForResult))
-        if (refillAmount > 0) {
-          // Only add to the updated pool list if we explicitly needed to top it up, otherwise it's
-          // possible we could have an ever-increasing pool if the upstream refill provider's batch
-          // size is large.
-          newPool.addAll(fetched.drop(remainingForResult))
-        }
+    val remainingForResult = count - result.size
+    val refillAmount =
+      if (newPool.size < minPoolSize) {
+        // Only try to refill if the new pool will have dropped below the minimum pool size.
+        maxOf(preferredPoolSize - newPool.size, 0)
+      } else {
+        0
       }
 
-      // Update the pool
-      poolsByParams[params] = newPool
-      return result.toList()
+    val toFetch = remainingForResult + refillAmount
+    if (toFetch > 0) {
+      val fetched = fallbackSource(params, toFetch, tokenValidityPredicate)
+      result.addAll(fetched.take(remainingForResult))
+      if (refillAmount > 0) {
+        // Only add to the updated pool list if we explicitly needed to top it up, otherwise it's
+        // possible we could have an ever-increasing pool if the upstream refill provider's batch
+        // size is large.
+        newPool.addAll(fetched.drop(remainingForResult))
+      }
     }
+
+    // Update the pool
+    poolsByParams[params] = newPool
+    return result.toList()
+  }
 
   override suspend fun clear() = lock.withLock { poolsByParams.clear() }
 
-  override suspend fun refresh(refillSource: TokenPoolSource<T>) =
-    lock.withLock {
-      poolsByParams.clear()
+  override suspend fun refresh(refillSource: TokenPoolSource<T>) = lock.withLock {
+    poolsByParams.clear()
 
-      // Consider parallelizing this.
-      for (params in refreshParams) {
-        poolsByParams[params] = refillSource(params, preferredPoolSize, tokenValidityPredicate)
-      }
+    // Consider parallelizing this.
+    for (params in refreshParams) {
+      poolsByParams[params] = refillSource(params, preferredPoolSize, tokenValidityPredicate)
     }
+  }
 }

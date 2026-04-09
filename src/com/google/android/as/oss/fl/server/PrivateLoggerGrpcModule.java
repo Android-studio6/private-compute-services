@@ -16,37 +16,29 @@
 
 package com.google.android.as.oss.fl.server;
 
-import android.content.Context;
-import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
 import com.google.android.as.oss.fl.api.proto.PrivateLoggingServiceGrpc;
-import com.google.android.as.oss.fl.fc.service.scheduler.Annotations.PrivateLoggerFcpInvoker;
-import com.google.android.as.oss.fl.fc.service.scheduler.FcpLoggerInvoker;
-import com.google.android.as.oss.fl.fc.service.scheduler.endorsementoptions.EndorsementOptionsProvider;
 import com.google.android.apps.miphone.pcs.grpc.Annotations.GrpcService;
 import com.google.android.apps.miphone.pcs.grpc.Annotations.GrpcServiceName;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
-import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import dagger.multibindings.IntoSet;
 import io.grpc.BindableService;
-import java.util.concurrent.ExecutorService;
+import io.grpc.ServerInterceptors;
+import io.grpc.binder.PeerUids;
 
 /** Module to provide GRPC Service used for scheduling/canceling federated jobs. */
 @Module
 @InstallIn(SingletonComponent.class)
 abstract class PrivateLoggerGrpcModule {
+  // PeerUid is used here only for logging. It is NOT used for any security or permission checks.
   @Provides
   @IntoSet
   @GrpcService
-  static BindableService provideBindableService(
-      EndorsementOptionsProvider endorsementOptionsProvider,
-      @FlExecutorQualifier ExecutorService executorService,
-      Context context,
-      @PrivateLoggerFcpInvoker FcpLoggerInvoker fcpLoggerInvoker) {
-    return new PrivateLoggerGrpcBindableService(
-        endorsementOptionsProvider, executorService, context, fcpLoggerInvoker);
+  static BindableService provideBindableService(PrivateLoggerGrpcBindableService service) {
+    return () ->
+        ServerInterceptors.intercept(service, PeerUids.newPeerIdentifyingServerInterceptor());
   }
 
   @Provides

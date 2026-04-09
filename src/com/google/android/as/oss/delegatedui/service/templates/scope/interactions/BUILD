@@ -26,12 +26,15 @@ android_library(
     ],
     deps = [
         "//src/com/google/android/as/oss/delegatedui/api/infra/dataservice:data_service_kt_proto_lite",
-        "//src/com/google/android/as/oss/delegatedui/api/integration/templates:templates_kt_proto_lite",
         "//src/com/google/android/as/oss/delegatedui/api/integration/templates:ui_id_token_kt_proto_lite",
         "//src/com/google/android/as/oss/delegatedui/service/templates/scope:helpers",
+        "//third_party/java/androidx/compose/animation/animation_core",
         "//third_party/java/androidx/compose/foundation",
+        "//third_party/java/androidx/compose/foundation/layout",
         "//third_party/java/androidx/compose/runtime",
         "//third_party/java/androidx/compose/ui",
+        "//third_party/java/androidx/compose/ui/unit",
         "//third_party/java/androidx/core/ktx",
+        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-jvm",
     ],
 )

@@ -307,8 +307,9 @@ class BlindSignAuthJniBridge(val messageInterface: MessageInterface) {
     proxyLayer: ProxyLayer,
     tokenChallenge: ByteString?,
     attester: Attester,
-  ): ListenableFuture<List<BlindSignToken>> =
-    scope.future { getAttestationTokens(numTokens, proxyLayer, tokenChallenge, attester) }
+  ): ListenableFuture<List<BlindSignToken>> = scope.future {
+    getAttestationTokens(numTokens, proxyLayer, tokenChallenge, attester)
+  }
 
   /**
    * The call to begin the token fetching process. The callback returns a challenge for attestation.

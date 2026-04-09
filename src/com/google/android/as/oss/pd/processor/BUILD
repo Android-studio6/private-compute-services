@@ -24,6 +24,5 @@ android_library(
     deps = [
         "//src/com/google/android/as/oss/pd/api:protected_download_java_proto_lite",
         "@maven//:com_google_guava_guava",
-        "@maven//:javax_inject_javax_inject",
     ],
 )

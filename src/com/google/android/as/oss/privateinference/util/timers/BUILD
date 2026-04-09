@@ -65,7 +65,6 @@ android_library(
         "//src/com/google/android/as/oss/logging:enums_java_proto_lite",
         "//src/com/google/android/as/oss/privateinference/library/oakutil:private_inference_client_timer_names",
         "//src/com/google/android/as/oss/privateinference/logging",
-        "@maven//:androidx_annotation_annotation",
         "@maven//:javax_inject_javax_inject",
     ],
 )
@@ -76,7 +75,6 @@ android_library(
     deps = [
         ":timers",
         "@maven//:com_google_errorprone_error_prone_annotations",
-        "@maven//:com_google_flogger_google_extensions",
     ],
 )
 
@@ -85,7 +83,6 @@ kt_jvm_library_with_nullness_check(
     srcs = ["TimerSet.kt"],
     deps = [
         ":timers_jvm",
-        "//third_party/java/flogger",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )

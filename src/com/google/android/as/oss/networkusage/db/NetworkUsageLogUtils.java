@@ -20,6 +20,7 @@ import static com.google.android.as.oss.attestation.PccAttestationMeasurementCli
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import android.content.Context;
 import arcs.core.data.proto.PolicyProto;
 import com.google.android.as.oss.networkusage.api.proto.AttestationConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.ConnectionKey;
@@ -29,10 +30,39 @@ import com.google.android.as.oss.networkusage.api.proto.HttpConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.PirConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.SurveyConnectionKey;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType;
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import com.google.common.flogger.GoogleLogger;
+import io.grpc.binder.PeerUid;
+import io.grpc.binder.PeerUids;
 
 /** Utility class for creating NetworkUsageLog entities. */
 public final class NetworkUsageLogUtils {
+  private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
+
+  /**
+   * Returns the calling package name for logging purposes.
+   *
+   * <p>This method is intended for on-device gRPC server implementations to get the calling package
+   * for logging purposes.
+   *
+   * <p>Note: The gRPC service using this method must install the
+   * `PeerUids.newPeerIdentifyingServerInterceptor()` for this method to work correctly.
+   */
+  // PeerUid is used here only for logging. It is NOT used for any security checks.
+  public static String getCallingPackageNameForLoggingPurposes(Context context) {
+    String callingPackageName = "";
+    PeerUid remotePeer = PeerUids.REMOTE_PEER.get();
+    if (remotePeer == null
+        || PeerUids.getInsecurePackagesForUid(context.getPackageManager(), remotePeer) == null) {
+      logger.atWarning().log("Calling package not set in PeerUid.");
+    } else {
+      callingPackageName =
+          PeerUids.getInsecurePackagesForUid(context.getPackageManager(), remotePeer)[0];
+      logger.atFine().log("Received call from package %s", callingPackageName);
+    }
+    return callingPackageName;
+  }
 
   public static ConnectionDetails createHttpConnectionDetails(String urlRegex, String packageName) {
     checkArgument(!Strings.isNullOrEmpty(urlRegex));
@@ -173,15 +203,18 @@ public final class NetworkUsageLogUtils {
   }
 
   public static NetworkUsageEntity createFcTrainingStartQueryNetworkUsageEntity(
-      ConnectionDetails connectionDetails, long runId, PolicyProto policyProto) {
+      ConnectionDetails connectionDetails, long runId, Optional<PolicyProto> policyProtoOptional) {
     checkArgument(connectionDetails.type() == ConnectionType.FC_TRAINING_START_QUERY);
     checkArgument(connectionDetails.connectionKey().hasFlConnectionKey());
-    checkNotNull(policyProto);
-    checkArgument(policyProto.isInitialized());
-    return getNetworkUsageEntityBuilder(connectionDetails, Status.SUCCEEDED, /* downloadSize= */ 0)
-        .setFcRunId(runId)
-        .setPolicyProto(policyProto)
-        .build();
+    NetworkUsageEntity.Builder builder =
+        getNetworkUsageEntityBuilder(connectionDetails, Status.SUCCEEDED, /* downloadSize= */ 0)
+            .setFcRunId(runId);
+    if (policyProtoOptional.isPresent()) {
+      PolicyProto policyProto = policyProtoOptional.get();
+      checkArgument(policyProto.isInitialized());
+      builder.setPolicyProto(policyProto);
+    }
+    return builder.build();
   }
 
   public static NetworkUsageEntity createPdNetworkUsageEntry(

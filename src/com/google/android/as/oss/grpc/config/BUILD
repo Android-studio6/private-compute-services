@@ -21,9 +21,5 @@ android_library(
     srcs = glob(
         ["*.java"],
     ),
-    deps = [
-        "//src/com/google/android/as/oss/common/security/api:package_security_info_kt_proto_lite",
-        "//third_party/java/auto:auto_value",
-        "@maven//:com_google_guava_guava",
-    ],
+    deps = ["//third_party/java/auto:auto_value"],
 )

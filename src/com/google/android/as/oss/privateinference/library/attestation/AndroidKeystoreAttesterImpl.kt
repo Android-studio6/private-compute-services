@@ -61,53 +61,52 @@ constructor(@ApplicationContext context: Context) {
   fun generateAttestation(
     attestationChallenge: ByteArray,
     includeDeviceProperties: Boolean,
-  ): List<ByteString> =
-    keystoreLock.withLock {
-      logger
-        .atFine()
-        .log(
-          "Generating device attestation with includeDeviceProperties: %s",
-          includeDeviceProperties,
-        )
-      // Create an attested KeyPair in order to create a new cert chain with our attestation
-      // challenge.
-      // The EC algorithm was chosen because it generates a new keypair the quickest.
-      //
-      // We will not actually use the generated key pair, we only want to use the generated cert
-      // chain to provide device attestation to the server.
-      val keyPairGenerator =
-        KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, ANDROID_KEY_STORE)
-
-      val includeDeviceProperties =
-        if (includeDeviceProperties && !hasDeviceIdFeature) {
-          logger
-            .atWarning()
-            .log("Device does not support device ID attestation but properties were requested.")
-          false
-        } else {
-          includeDeviceProperties
-        }
-
-      keyPairGenerator.initialize(
-        KeyGenParameterSpec.Builder(ANDROID_KEY_STORE_ALIAS, KeyProperties.PURPOSE_SIGN)
-          .setKeySize(224)
-          .setDevicePropertiesAttestationIncluded(includeDeviceProperties)
-          .setAttestationChallenge(attestationChallenge)
-          .build()
+  ): List<ByteString> = keystoreLock.withLock {
+    logger
+      .atFine()
+      .log(
+        "Generating device attestation with includeDeviceProperties: %s",
+        includeDeviceProperties,
       )
+    // Create an attested KeyPair in order to create a new cert chain with our attestation
+    // challenge.
+    // The EC algorithm was chosen because it generates a new keypair the quickest.
+    //
+    // We will not actually use the generated key pair, we only want to use the generated cert
+    // chain to provide device attestation to the server.
+    val keyPairGenerator =
+      KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, ANDROID_KEY_STORE)
 
-      // Generate the key pair. This will result in calls to both generate_key() and
-      // attest_key() at the keymaster2 HAL.
-      val unused = keyPairGenerator.generateKeyPair()
-
-      // Get the certificate chain
-      val keyStore = KeyStore.getInstance(ANDROID_KEY_STORE)
-      keyStore.load(null)
-
-      (keyStore.getCertificateChain(ANDROID_KEY_STORE_ALIAS) ?: emptyArray()).map {
-        ByteString.copyFrom(it.encoded)
+    val includeDeviceProperties =
+      if (includeDeviceProperties && !hasDeviceIdFeature) {
+        logger
+          .atWarning()
+          .log("Device does not support device ID attestation but properties were requested.")
+        false
+      } else {
+        includeDeviceProperties
       }
+
+    keyPairGenerator.initialize(
+      KeyGenParameterSpec.Builder(ANDROID_KEY_STORE_ALIAS, KeyProperties.PURPOSE_SIGN)
+        .setKeySize(224)
+        .setDevicePropertiesAttestationIncluded(includeDeviceProperties)
+        .setAttestationChallenge(attestationChallenge)
+        .build()
+    )
+
+    // Generate the key pair. This will result in calls to both generate_key() and
+    // attest_key() at the keymaster2 HAL.
+    val unused = keyPairGenerator.generateKeyPair()
+
+    // Get the certificate chain
+    val keyStore = KeyStore.getInstance(ANDROID_KEY_STORE)
+    keyStore.load(null)
+
+    (keyStore.getCertificateChain(ANDROID_KEY_STORE_ALIAS) ?: emptyArray()).map {
+      ByteString.copyFrom(it.encoded)
     }
+  }
 
   companion object {
     private val logger = GoogleLogger.forEnclosingClass()

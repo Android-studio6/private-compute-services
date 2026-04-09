@@ -38,6 +38,11 @@ public final class Annotations {
   @Retention(RetentionPolicy.RUNTIME)
   public @interface PrivateInferenceEnableArateaTokenCache {}
 
+  /** Annotation for whether to enable async token cache refills. */
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface PrivateInferenceEnableAsyncTokenCacheRefill {}
+
   /** Annotation for whether to attach Android package name and certificate to the request. */
   @Qualifier
   @Retention(RetentionPolicy.RUNTIME)

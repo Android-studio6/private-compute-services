@@ -23,12 +23,14 @@ import com.google.android.as.oss.common.config.FlagNamespace;
 import com.google.android.as.oss.privateinference.Annotations.PiServerChannelIdleTimeoutMinutes;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceAttachCertificateHeader;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEnableArateaTokenCache;
+import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEnableAsyncTokenCacheRefill;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEndpointUrl;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceWaitForGrpcChannelReady;
 import com.google.android.as.oss.privateinference.Annotations.TokenIssuanceEndpointUrl;
 import com.google.android.as.oss.privateinference.config.PrivateInferenceConfig;
 import com.google.android.as.oss.privateinference.library.oakutil.AttestationPublisherFlag;
 import com.google.android.as.oss.privateinference.library.oakutil.DeviceAttestationFlag;
+import com.google.android.as.oss.privateinference.transport.IpRelayFallbackFlag;
 import com.google.android.as.oss.privateinference.transport.TransportFlag;
 import dagger.Binds;
 import dagger.Module;
@@ -65,6 +67,10 @@ interface PrivateInferenceConfigModule {
   @Binds
   @Singleton
   abstract ProxyAuthFlag bindsProxyAuthFlag(PcsConfigProxyAuthFlag flag);
+
+  @Binds
+  @Singleton
+  abstract IpRelayFallbackFlag bindsIpRelayFallbackFlag(PcsConfigIpRelayFallbackFlag flag);
 
   @Provides
   @Singleton
@@ -103,6 +109,13 @@ interface PrivateInferenceConfigModule {
   @PrivateInferenceEnableArateaTokenCache
   static boolean providesEnableArateaTokenCache(ConfigReader<PrivateInferenceConfig> configReader) {
     return configReader.getConfig().enableArateaTokenCache();
+  }
+
+  @Provides
+  @PrivateInferenceEnableAsyncTokenCacheRefill
+  static boolean providesEnableAsyncTokenCacheRefill(
+      ConfigReader<PrivateInferenceConfig> configReader) {
+    return configReader.getConfig().enableAsyncTokenCacheRefill();
   }
 
   @Provides

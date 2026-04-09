@@ -28,7 +28,6 @@ proto_library(
     deps = [
         "",
         "//src/com/google/android/as/oss/feedback/proto:feedback_dialog_common_data_proto",
-        "//third_party/protobuf:cpp_features_proto",
     ],
 )
 
@@ -45,10 +44,7 @@ kt_jvm_lite_proto_library(
 proto_library(
     name = "attribution_chip_header_proto",
     srcs = ["attribution_chip_header.proto"],
-    deps = [
-        "",
-        "//third_party/protobuf:cpp_features_proto",
-    ],
+    deps = [""],
 )
 
 java_lite_proto_library(

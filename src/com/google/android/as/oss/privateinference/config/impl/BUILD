@@ -21,6 +21,17 @@ package(default_visibility = [
 ])
 
 android_library(
+    name = "pcs_config_ip_relay_fallback_flag",
+    srcs = ["PcsConfigIpRelayFallbackFlag.kt"],
+    deps = [
+        "//src/com/google/android/as/oss/common/config",
+        "//src/com/google/android/as/oss/privateinference/config",
+        "//src/com/google/android/as/oss/privateinference/transport",
+        "@maven//:javax_inject_javax_inject",
+    ],
+)
+
+android_library(
     name = "impl",
     srcs = [
         "PcsConfigArateaAuthFlag.kt",
@@ -34,6 +45,7 @@ android_library(
     deps = [
         ":aratea_auth_flag",
         ":device_info_module",  # buildcleaner: keep
+        ":pcs_config_ip_relay_fallback_flag",
         ":proxy_auth_flag",
         "//src/com/google/android/as/oss/common:annotation",
         "//src/com/google/android/as/oss/common/config",
@@ -114,6 +126,7 @@ android_library(
     ],
     deps = [
         ":noop_device_info_module",  # buildcleaner: keep
+        ":pcs_config_ip_relay_fallback_flag",
         "//src/com/google/android/as/oss/common:annotation",
         "//src/com/google/android/as/oss/common/config",
         "//src/com/google/android/as/oss/privateinference:annotations",

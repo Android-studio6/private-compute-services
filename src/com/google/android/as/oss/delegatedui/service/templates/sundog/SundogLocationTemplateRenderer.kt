@@ -178,11 +178,12 @@ class SundogLocationTemplateRenderer @Inject internal constructor() : TemplateRe
                           }
                         )
                     }
-                    .padding(vertical = 20.dp, horizontal = 28.dp),
+                    .padding(vertical = 20.dp, horizontal = 21.dp),
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically,
               ) {
                 PrimaryRoundedIcon(
+                  iconBackgroundWidth = 59.dp,
                   iconColor = MaterialTheme.colorScheme.onSecondary,
                   iconBackgroundColor = MaterialTheme.colorScheme.secondary,
                   imageBitmap = response.image.valueOrNull,

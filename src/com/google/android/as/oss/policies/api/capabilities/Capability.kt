@@ -320,8 +320,9 @@ sealed class Capability(val tag: String) {
       val ANY = Range(Shareable(false), Shareable(true))
 
       fun fromAnnotations(annotations: List<Annotation>): Shareable? {
-        val filtered =
-          annotations.filter { arrayOf("shareable", "tiedToRuntime").contains(it.name) }
+        val filtered = annotations.filter {
+          arrayOf("shareable", "tiedToRuntime").contains(it.name)
+        }
         return when (filtered.size) {
           0 -> null
           1 -> {

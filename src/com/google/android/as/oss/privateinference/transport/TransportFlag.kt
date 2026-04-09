@@ -33,6 +33,15 @@ interface TransportFlag {
 
     /** Use statically linked Cronet with IP Relay. */
     CRONET_STATIC_IP_RELAY,
+
+    /**
+     * Use Cronet (mainline version) transport with IP Relay.
+     *
+     * This is only supported by up to date devices that support the new Proxy APIs (required for IP
+     * Relay) via HttpEngine. When not supported, this gracefully falls back to
+     * CRONET_STATIC_IP_RELAY.
+     */
+    CRONET_MAINLINE_IP_RELAY,
   }
 
   fun mode(): Mode

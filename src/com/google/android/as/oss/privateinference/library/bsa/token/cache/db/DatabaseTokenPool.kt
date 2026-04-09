@@ -28,6 +28,8 @@ import com.google.android.`as`.oss.privateinference.library.bsa.token.ProxyToken
 import com.google.android.`as`.oss.privateinference.library.bsa.token.cache.TokenPool
 import com.google.android.`as`.oss.privateinference.library.bsa.token.cache.TokenPoolSource
 import com.google.android.`as`.oss.privateinference.library.bsa.token.crypto.BsaTokenCipher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -37,12 +39,23 @@ import kotlinx.coroutines.sync.withLock
  * A single pool is maintained for each unique instance of [BsaTokenParams] either passed as
  * [refreshParams] or to the [draw] method.
  *
+ * If [enableAsyncTokenCacheRefill] is true, then token cache refills will be performed
+ * asynchronously and will not block the calling thread. However, any pending tokens needed while
+ * drawing from the pool on-demand will be fetched synchronously and will block the calling thread.
+ *
  * @param refreshParams List of [BsaTokenParams] to use when making requests to a [TokenPoolSource]
  *   when pre-filling the pool to the [preferredPoolSize].
  * @param minPoolSize The minimum size a pool is allowed to fall-to before the fallback
  *   [TokenPoolSource] is used to re-populate a pool during a [draw] call.
  * @param preferredPoolSize The size a pool is filled-to when a [TokenPoolSource] is used to re-fill
  *   it.
+ * @param cipher [BsaTokenCipher] used to encrypt/decrypt tokens when storing them in the database.
+ * @param daoProvider Provider for the [BsaTokenDao] used to store/retrieve tokens from the
+ *   database.
+ * @param timeSource [TimeSource] used to determine token expiration.
+ * @param enableAsyncTokenCacheRefill If true, token cache refills will be performed asynchronously
+ *   and will not block the calling thread.
+ * @param coroutineScope [CoroutineScope] on which any coroutines will be run.
  */
 class DatabaseTokenPool<T : BsaToken>(
   private val refreshParams: List<BsaTokenParams<T>>,
@@ -51,27 +64,52 @@ class DatabaseTokenPool<T : BsaToken>(
   private val cipher: BsaTokenCipher,
   private val daoProvider: () -> BsaTokenDao,
   private val timeSource: TimeSource,
+  private val enableAsyncTokenCacheRefill: Boolean,
+  private val coroutineScope: CoroutineScope,
 ) : TokenPool<T> {
   private val dbLock = Mutex()
+  private val refillLock = Mutex()
 
   override suspend fun draw(
     params: BsaTokenParams<T>,
     count: Int,
     fallbackSource: TokenPoolSource<T>,
-  ): List<T> =
-    dbLock.withLock {
-      val (dbTokens, poolSizePostFetch, _) =
-        daoProvider().drawTokens(params, count, timeSource.now())
-      val resultTokens = dbTokens.mapNotNull { decrypt(it) }.toMutableList()
+  ): List<T> = dbLock.withLock {
+    val (dbTokens, poolSizePostFetch, _) = daoProvider().drawTokens(params, count, timeSource.now())
+    val resultTokens = dbTokens.mapNotNull { decrypt(it) }.toMutableList()
 
-      val resultTokensNeeded = count - resultTokens.size
-      val dbTokensNeeded =
-        if (poolSizePostFetch < minPoolSize) {
-          preferredPoolSize - poolSizePostFetch
-        } else {
-          0
+    val resultTokensNeeded = count - resultTokens.size
+    val dbTokensNeeded =
+      if (poolSizePostFetch < minPoolSize) {
+        preferredPoolSize - poolSizePostFetch
+      } else {
+        0
+      }
+
+    if (enableAsyncTokenCacheRefill) {
+      // Synchronously fetch any remaining tokens needed for the result to avoid blocking until
+      // the cache refill completes.
+      if (resultTokensNeeded > 0) {
+        resultTokens.addAll(
+          fallbackSource(params, resultTokensNeeded, BsaTokenDao.tokenValidator(timeSource))
+        )
+      }
+      // Asynchronously fetch tokens to refill the cache, if there isn't a refill already in
+      // progress.
+      coroutineScope.launch {
+        if (dbTokensNeeded > 0 && refillLock.tryLock()) {
+          try {
+            val refillTokens =
+              fallbackSource(params, dbTokensNeeded, BsaTokenDao.tokenValidator(timeSource))
+            dbLock.withLock {
+              daoProvider().insertAll(refillTokens.mapNotNull { encrypt(params, it) })
+            }
+          } finally {
+            refillLock.unlock()
+          }
         }
-
+      }
+    } else {
       val totalTokensNeeded = resultTokensNeeded + dbTokensNeeded
       if (totalTokensNeeded > 0) {
         val newTokens =
@@ -82,21 +120,21 @@ class DatabaseTokenPool<T : BsaToken>(
             .insertAll(newTokens.drop(resultTokensNeeded).mapNotNull { encrypt(params, it) })
         }
       }
-      return@withLock resultTokens
     }
+    return@withLock resultTokens
+  }
 
   override suspend fun clear() = dbLock.withLock { daoProvider().deleteAll(refreshParams) }
 
-  override suspend fun refresh(refillSource: TokenPoolSource<T>) =
-    dbLock.withLock {
-      daoProvider().deleteAll(refreshParams)
-      val toInsert =
-        refreshParams.flatMap { params ->
-          refillSource(params, preferredPoolSize, BsaTokenDao.tokenValidator(timeSource))
-            .mapNotNull { encrypt(params, it) }
-        }
-      daoProvider().insertAll(toInsert)
+  override suspend fun refresh(refillSource: TokenPoolSource<T>) = dbLock.withLock {
+    daoProvider().deleteAll(refreshParams)
+    val toInsert = refreshParams.flatMap { params ->
+      refillSource(params, preferredPoolSize, BsaTokenDao.tokenValidator(timeSource)).mapNotNull {
+        encrypt(params, it)
+      }
     }
+    daoProvider().insertAll(toInsert)
+  }
 
   private suspend fun encrypt(params: BsaTokenParams<T>, token: T): BsaTokenEntity? {
     val expiration =

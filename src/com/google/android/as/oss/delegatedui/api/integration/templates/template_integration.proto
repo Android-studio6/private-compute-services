@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.delegatedui.api.integration.templates;
 
@@ -24,14 +24,18 @@ import "src/com/google/android/as/oss/delegatedui/api/integration/templates/free
 import "src/com/google/android/as/oss/delegatedui/api/integration/templates/subzero/subzero_template_integration.proto";
 import "src/com/google/android/as/oss/delegatedui/api/integration/templates/sundog/sundog_template_integration.proto";
 
+import option "third_party/protobuf/cpp_features.proto";
+
+option java_outer_classname = "TemplateIntegration";
 option java_package = "com.google.android.as.oss.delegatedui.api.integration.templates";
-option java_multiple_files = true;
 
 // Protos encapsulating template data managed by the delegated UI service.
 
 // A list of supported UI templates.
 // Next ID: 11
 enum DelegatedUiTemplateType {
+  option features.(pb.cpp).enum_name_uses_string_view = false;
+
   TEMPLATE_TYPE_UNSPECIFIED = 0;
   TEMPLATE_TYPE_EXAMPLE_COMPOSE = 1;
   TEMPLATE_TYPE_BUGLE = 2;
@@ -42,6 +46,7 @@ enum DelegatedUiTemplateType {
   TEMPLATE_TYPE_EXAMPLE_VIEWS = 8;
   TEMPLATE_TYPE_AIRFLOW = 9;
   TEMPLATE_TYPE_FREESIA = 10;
+
   // New CUJ template types should be added above.
 
   // Retired template enums.
@@ -61,8 +66,10 @@ message DelegatedUiTemplateData {
     beacon.BeaconTemplateData beacon_template_data = 6;
     airflow.AirflowTemplateData airflow_template_data = 8;
     freesia.FreesiaTemplateData freesia_template_data = 9;
+
     // New CUJ template data types should be added above.
   }
+
   reserved 7;
 }
 
@@ -70,6 +77,7 @@ message DelegatedUiAdditionalData {
   oneof additional_data {
     example.ExampleAdditionalData example_additional_data = 1;
     bugle.BugleAdditionalData bugle_additional_data = 2;
+
     // New CUJ additional data types should be added above.
   }
 }

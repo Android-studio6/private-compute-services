@@ -152,6 +152,8 @@ internal object CachingTokenProviderModule {
           cipher = cipher,
           daoProvider = { database.get().bsaTokenDao() },
           timeSource = timeSource,
+          enableAsyncTokenCacheRefill = configReader.config.enableAsyncTokenCacheRefill(),
+          coroutineScope = coroutineScope,
         ),
     )
 
@@ -201,6 +203,8 @@ internal object CachingTokenProviderModule {
           cipher = cipher,
           daoProvider = { database.get().bsaTokenDao() },
           timeSource = timeSource,
+          enableAsyncTokenCacheRefill = configReader.config.enableAsyncTokenCacheRefill(),
+          coroutineScope = coroutineScope,
         ),
     )
 

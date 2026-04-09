@@ -71,7 +71,6 @@ android_library(
         ":ground_truth_data",
         ":view_feedback_data",
         "//src/com/google/android/as/oss/feedback/proto:feedback_tag_data_kt_proto_lite",
-        "//src/com/google/android/as/oss/feedback/proto/gateway:spoon_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/quartz/serviceclient:quartz_service_client",
         "//src/com/google/android/as/oss/feedback/serviceclient:service_client",
     ],

@@ -49,6 +49,7 @@ android_library(
         ":networkusage",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
+        "@maven//:javax_inject_javax_inject",
     ],
 )
 

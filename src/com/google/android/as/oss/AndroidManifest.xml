@@ -41,6 +41,9 @@
   <!-- Required in V+ for correct grammatical gender in translated strings. -->
   <uses-permission android:name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER" />
 
+  <!-- To be able to render personal context autofill insights and host a visualizer. -->
+  <uses-permission android:name="android.permission.PERSONAL_CONTEXT_RECEIVE_INSIGHTS"/>
+
   <!-- Required to act as a Private Compute Service (PCS) Gateway App -->
   <uses-permission android:name="android.permission.PROVIDE_PRIVATE_COMPUTE_SERVICES" />
 

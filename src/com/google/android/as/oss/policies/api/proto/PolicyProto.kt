@@ -112,19 +112,17 @@ private fun PolicyFieldProto.decode(parentFieldPath: List<FieldName> = emptyList
 }
 
 fun PolicyField.encode(): PolicyFieldProto {
-  val rawUsages =
-    rawUsages.map { usage ->
-      PolicyFieldProto.AllowedUsage.newBuilder().setUsage(usage.encode()).build()
+  val rawUsages = rawUsages.map { usage ->
+    PolicyFieldProto.AllowedUsage.newBuilder().setUsage(usage.encode()).build()
+  }
+  val redactedUsages = redactedUsages.flatMap { (label, usages) ->
+    usages.map { usage ->
+      PolicyFieldProto.AllowedUsage.newBuilder()
+        .setRedactionLabel(label)
+        .setUsage(usage.encode())
+        .build()
     }
-  val redactedUsages =
-    redactedUsages.flatMap { (label, usages) ->
-      usages.map { usage ->
-        PolicyFieldProto.AllowedUsage.newBuilder()
-          .setRedactionLabel(label)
-          .setUsage(usage.encode())
-          .build()
-      }
-    }
+  }
   val allUsages = rawUsages + redactedUsages
   return PolicyFieldProto.newBuilder()
     .setName(fieldPath.last())

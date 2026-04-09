@@ -22,6 +22,7 @@ import com.google.android.as.oss.privateinference.library.bsa.token.cache.TokenC
 import com.google.android.as.oss.privateinference.library.bsa.token.cache.TokenCacheFlag.Mode;
 import com.google.android.as.oss.privateinference.library.oakutil.AttestationPublisherFlag;
 import com.google.android.as.oss.privateinference.library.oakutil.DeviceAttestationFlag;
+import com.google.android.as.oss.privateinference.transport.IpRelayFallbackFlag;
 import com.google.android.as.oss.privateinference.transport.ProxyConfigProviderType;
 import com.google.android.as.oss.privateinference.transport.ProxyConfiguration;
 import com.google.android.as.oss.privateinference.transport.TransportFlag;
@@ -48,6 +49,7 @@ public abstract class PrivateInferenceConfig {
         .setProxyTokenDurableCachePreferredPoolSize(
             DEFAULT_PROXY_TOKEN_DURABLE_CACHE_PREFERRED_POOL_SIZE)
         .setEnableArateaTokenCache(DEFAULT_ENABLE_ARATEA_TOKEN_CACHE)
+        .setEnableAsyncTokenCacheRefill(DEFAULT_ENABLE_ASYNC_TOKEN_CACHE_REFILL)
         .setArateaTokenBatchSize(DEFAULT_ARATEA_TOKEN_BATCH_SIZE)
         .setArateaTokenCacheMode(DEFAULT_ARATEA_TOKEN_CACHE_MODE)
         .setArateaTokenCacheRefreshIntervalMinutes(
@@ -73,7 +75,8 @@ public abstract class PrivateInferenceConfig {
         .setTokenIssuanceEndpointUrl(DEFAULT_TOKEN_ISSUANCE_ENDPOINT_URL)
         .setArateaAuthMode(DEFAULT_ARATEA_AUTH_MODE)
         .setProxyAuthMode(DEFAULT_PROXY_AUTH_MODE)
-        .setPiServerChannelIdleTimeoutMinutes(DEFAULT_PI_SERVER_CHANNEL_IDLE_TIMEOUT_MINUTES);
+        .setPiServerChannelIdleTimeoutMinutes(DEFAULT_PI_SERVER_CHANNEL_IDLE_TIMEOUT_MINUTES)
+        .setIpRelayFallbackMode(DEFAULT_IP_RELAY_FALLBACK_MODE);
   }
 
   /** Returns the current attestation publisher mode. */
@@ -100,6 +103,9 @@ public abstract class PrivateInferenceConfig {
    * requests will be cached.
    */
   public abstract boolean enableArateaTokenCache();
+
+  /** Returns true if the Aratea token cache refill should happen asynchronously. */
+  public abstract boolean enableAsyncTokenCacheRefill();
 
   /** Returns the current transport mode requests will use. */
   public abstract TransportFlag.Mode transportMode();
@@ -165,6 +171,12 @@ public abstract class PrivateInferenceConfig {
   /** Returns the idle timeout in minutes for the PI Server gRPC channel. */
   public abstract long piServerChannelIdleTimeoutMinutes();
 
+  /**
+   * Returns the IP relay fallback mode. When set to FORCE_STATIC, the system will skip trying
+   * mainline HttpEngine and immediately use static Cronet for IP Relay.
+   */
+  public abstract IpRelayFallbackFlag.Mode ipRelayFallbackMode();
+
   public static final String PRIVATE_INFERENCE_PROD_ENDPOINT_URL =
       "privatearatea.pa.googleapis.com";
   public static final String TOKEN_ISSUANCE_PROD_ENDPOINT_URL = "phosphor-pa.googleapis.com";
@@ -180,8 +192,9 @@ public abstract class PrivateInferenceConfig {
   public static final boolean DEFAULT_ENABLE_WAIT_FOR_GRPC_CHANNEL_READY = true;
   public static final boolean DEFAULT_ATTACH_CERTIFICATE_HEADER = false;
   public static final boolean DEFAULT_ENABLE_ARATEA_TOKEN_CACHE = false;
+  public static final boolean DEFAULT_ENABLE_ASYNC_TOKEN_CACHE_REFILL = false;
   public static final TransportFlag.Mode DEFAULT_TRANSPORT_MODE =
-      TransportFlag.Mode.CRONET_STATIC_IP_RELAY;
+      TransportFlag.Mode.CRONET_MAINLINE_IP_RELAY;
 
   public static final String DEFAULT_PROXY_URL = "ToBeProvidedByFlags";
   public static final int DEFAULT_PROXY_PORT = 0;
@@ -225,6 +238,9 @@ public abstract class PrivateInferenceConfig {
 
   public static final long DEFAULT_PI_SERVER_CHANNEL_IDLE_TIMEOUT_MINUTES = 5L;
 
+  public static final IpRelayFallbackFlag.Mode DEFAULT_IP_RELAY_FALLBACK_MODE =
+      IpRelayFallbackFlag.Mode.DEFAULT;
+
   /** Builder for {@link PrivateInferenceConfig}. */
   @AutoValue.Builder
   public abstract static class Builder {
@@ -241,6 +257,8 @@ public abstract class PrivateInferenceConfig {
     public abstract Builder setAttachCertificateHeader(boolean value);
 
     public abstract Builder setEnableArateaTokenCache(boolean value);
+
+    public abstract Builder setEnableAsyncTokenCacheRefill(boolean value);
 
     public abstract Builder setTransportMode(TransportFlag.Mode value);
 
@@ -285,6 +303,8 @@ public abstract class PrivateInferenceConfig {
     public abstract Builder setProxyAuthMode(ProxyAuthFlag.Mode mode);
 
     public abstract Builder setPiServerChannelIdleTimeoutMinutes(long minutes);
+
+    public abstract Builder setIpRelayFallbackMode(IpRelayFallbackFlag.Mode mode);
 
     public abstract PrivateInferenceConfig build();
   }

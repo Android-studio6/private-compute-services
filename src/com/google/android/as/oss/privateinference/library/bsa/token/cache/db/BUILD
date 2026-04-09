@@ -32,6 +32,7 @@ android_library(
         "//src/com/google/android/as/oss/privateinference/library/bsa/token:token_provider",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token/cache:token_pool",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token/crypto",
+        "//third_party/java/androidx/room:room-android",
         "//third_party/java/okio:okio_android",
         "@maven//:androidx_room_room_common",
         "@maven//:androidx_room_room_runtime",
@@ -57,9 +58,11 @@ android_library(
     srcs = ["DatabaseModule.kt"],
     deps = [
         ":db",
+        "//third_party/java/androidx/room:room-android",
         "@maven//:androidx_room_room_common",
         "@maven//:androidx_room_room_runtime",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
+        "@maven//:javax_inject_javax_inject",
     ],
 )

@@ -81,7 +81,6 @@ android_library(
     deps = [
         ":parcelable_key",
         ":parcelable_over_rpc",
-        "@maven//:io_grpc_grpc_api",
         "@maven//:io_grpc_grpc_context",
         "@maven//:io_grpc_grpc_stub",
     ],

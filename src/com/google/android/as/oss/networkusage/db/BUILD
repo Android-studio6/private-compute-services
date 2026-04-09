@@ -33,9 +33,9 @@ android_library(
     deps = [
         "//src/com/google/android/as/oss/attestation",
         "//src/com/google/android/as/oss/networkusage/api:connection_key_java_proto_lite",
+        "//third_party/java/androidx/room:room-android",
         "//third_party/java/auto:auto_value",
         "//third_party/java/auto:auto_value_parcel_adapter",
-        "@maven//:androidx_annotation_annotation",
         "@maven//:androidx_lifecycle_lifecycle_livedata",
         "@maven//:androidx_lifecycle_lifecycle_livedata_core",
         "@maven//:androidx_room_room_common",
@@ -43,6 +43,7 @@ android_library(
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:com_google_guava_guava",
         "@maven//:com_google_protobuf_protobuf_lite",
+        "@maven//:io_grpc_grpc_binder",
         "@maven//:javax_inject_javax_inject",
         "@private_compute_libraries//java/com/google/android/libraries/pcc/chronicle/api/policy/proto:policy_java_proto_lite",
     ],

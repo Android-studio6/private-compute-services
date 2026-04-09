@@ -26,7 +26,7 @@
       android:minSdkVersion="31"
       android:targetSdkVersion="33" />
 
-  <application>
+  <application android:supportsRtl="true">
     <activity
         android:name=".NetworkUsageLogActivity"
         android:theme="@style/NetworkUsageLogTheme"

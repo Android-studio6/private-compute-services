@@ -38,6 +38,7 @@ android_library(
         "//src/com/google/android/as/oss/delegatedui/utils:parcelable_over_rpc",
         "//third_party/java/androidx/compose/runtime",
         "//third_party/java/androidx/compose/ui",
+        "//third_party/java/androidx/compose/ui/unit",
         "//third_party/java/androidx/core/ktx",
         "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-jvm",
         "@maven//:androidx_core_core",

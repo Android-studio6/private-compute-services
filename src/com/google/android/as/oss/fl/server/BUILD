@@ -19,12 +19,14 @@ package(default_visibility = ["//visibility:public"])
 android_library(
     name = "service",
     srcs = [
+        "CallingPackageNameProvider.java",
         "PrivateLoggerGrpcBindableService.java",
         "PrivateLoggerGrpcModule.java",
         "TrainerGrpcBindableService.java",
         "TrainerGrpcModule.java",
     ],
     deps = [
+        "//java/com/google/frameworks/client/data/android/server:suppress_peer_uid",
         "//src/com/google/android/as/oss/common:annotation",
         "//src/com/google/android/as/oss/fl/api:private_logging_grpc",
         "//src/com/google/android/as/oss/fl/api:private_logging_java_proto_lite",
@@ -39,6 +41,9 @@ android_library(
         "//src/com/google/android/as/oss/fl/localcompute:resource_manager",
         "//src/com/google/android/as/oss/fl/localcompute:utils",
         "//src/com/google/android/as/oss/grpc:annotations",
+        "//src/com/google/android/as/oss/networkusage/db",
+        "//src/com/google/android/as/oss/networkusage/db:repository",
+        "//src/com/google/android/as/oss/protos:pcs_feature_enum_java_proto_lite",
         "//third_party/fcp/client:selector_context_java_proto_lite",
         "//third_party/fcp/java_src/main/java/com/google/fcp/client/privatelogger",
         "//third_party/fcp/java_src/main/java/com/google/fcp/client/privatelogger/impl",
@@ -50,6 +55,7 @@ android_library(
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:com_google_guava_guava",
         "@maven//:io_grpc_grpc_api",
+        "@maven//:io_grpc_grpc_binder",
         "@maven//:io_grpc_grpc_stub",
         "@maven//:javax_inject_javax_inject",
         "@maven//:org_checkerframework_checker_qual",

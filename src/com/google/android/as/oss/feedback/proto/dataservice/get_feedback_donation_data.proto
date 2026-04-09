@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.feedback.api.dataservice;
 
@@ -21,8 +21,8 @@ import "src/com/google/android/as/oss/feedback/proto/gateway/pixel_apex_api.prot
 import "src/com/google/android/as/oss/feedback/proto/gateway/quartz_log.proto";
 import "src/com/google/android/as/oss/feedback/proto/gateway/spoon.proto";
 
+option java_outer_classname = "GetFeedbackDonationData";
 option java_package = "com.google.android.as.oss.feedback.api.dataservice";
-option java_multiple_files = true;
 
 // Request for getting feedback donation data.
 message GetFeedbackDonationDataRequest {
@@ -46,7 +46,9 @@ message GetFeedbackDonationDataRequest {
 message GetFeedbackDonationDataResponse {
   feedback.api.gateway.UserDonation donation_data = 1;
   string app_id = 2;
+
   string interaction_id = 3;
+
   feedback.api.gateway.RuntimeConfig runtime_config = 4;
   FeedbackUiRenderingData feedback_ui_rendering_data = 5;
   feedback.api.gateway.SpoonCUJ cuj = 6;
@@ -67,41 +69,59 @@ message GetFeedbackDonationDataResponse {
 message FeedbackUiRenderingData {
   string feedback_dialog_good_feedback_title = 5
      ;
+
   string feedback_dialog_bad_feedback_title = 6
      ;
+
   string feedback_dialog_fallback_title = 19
      ;
+
   string feedback_dialog_free_form_label = 7
      ;
+
   string feedback_dialog_free_form_hint = 8
      ;
+
   string feedback_dialog_opt_in_checkbox_content_description = 21
      ;
+
   string feedback_dialog_opt_in_label = 9
      ;
+
   string feedback_dialog_opt_in_label_generic_info_label = 20
      ;
+
   string feedback_dialog_opt_in_label_link_privacy_policy = 18
      ;
+
   string feedback_dialog_opt_in_label_link_view_data = 10
      ;
+
   string feedback_dialog_button_label = 11
      ;
+
   repeated FeedbackTagData feedback_chips = 12;
   string feedback_dialog_view_data_title = 13
      ;
+
   string feedback_dialog_view_data_back_button_content_description = 14
      ;
+
   string feedback_dialog_view_data_header = 15
       [ deprecated = true];
+
   string feedback_dialog_sent_successfully_toast = 16
      ;
+
   string feedback_dialog_sent_failed_toast = 17
      ;
+
   string feedback_dialog_opt_in_v2_title = 23
      ;
+
   string feedback_dialog_opt_in_v2_description = 24
      ;
+
   string feedback_dialog_ground_truth_title = 25
      ;
 
@@ -112,18 +132,27 @@ message FeedbackUiRenderingData {
 message FeedbackViewDataCategoryTitles {
   string triggering_messages_title = 1
      ;
+
   string intent_queries_title = 2;
+
   string model_outputs_title = 3;
+
   string memory_entities_title = 4;
+
   string selected_entity_content_title = 5
      ;
+
   string expand_category_button_semantics_description = 6
      ;
+
   string collapse_category_button_semantics_description = 7
      ;
+
   string notification_content_title = 8
      ;
+
   string app_info_title = 9;
+
   string quartz_model_outputs_title = 10
      ;
 }

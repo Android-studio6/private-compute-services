@@ -63,8 +63,9 @@ fun FeedbackOptInControl(
       Checkbox(
         modifier =
           Modifier.semantics {
-            contentDescription =
-              optInCheckboxContentDescription.ifEmpty { viewDataTitle } // For backwards compat.
+            contentDescription = optInCheckboxContentDescription.ifEmpty {
+              viewDataTitle
+            } // For backwards compat.
           },
         checked = optInChecked,
         onCheckedChange = onOptInCheckedChanged,

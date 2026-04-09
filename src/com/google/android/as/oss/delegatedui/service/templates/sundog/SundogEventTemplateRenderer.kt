@@ -176,7 +176,10 @@ class SundogEventTemplateRenderer @Inject internal constructor() : TemplateRende
               },
             )
             .background(color = MaterialTheme.colorScheme.secondaryContainer)
-            .padding(vertical = 12.dp, horizontal = 12.dp),
+            .padding(vertical = 12.dp, horizontal = 12.dp)
+            .padding(
+              end = 10.dp
+            ), // Add padding to prevent the text from getting too close to the end of the card.
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
       ) {

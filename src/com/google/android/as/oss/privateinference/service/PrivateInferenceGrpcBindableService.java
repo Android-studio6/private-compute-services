@@ -22,6 +22,7 @@ import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.flavor.BuildFlavor;
 import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
 import com.google.android.as.oss.logging.PcsStatsEnums.ValueMetricId;
+import com.google.android.as.oss.networkusage.db.NetworkUsageLogUtils;
 import com.google.android.as.oss.privateinference.config.PrivateInferenceConfig;
 import com.google.android.as.oss.privateinference.library.PrivateInferenceRequestMetadata;
 import com.google.android.as.oss.privateinference.library.oakutil.AttestationVerificationException;
@@ -47,8 +48,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
 import io.grpc.Status;
 import io.grpc.Status.Code;
 import io.grpc.StatusException;
-import io.grpc.binder.PeerUid;
-import io.grpc.binder.PeerUids;
 import io.grpc.stub.StreamObserver;
 import java.io.InputStream;
 import java.time.Instant;
@@ -111,7 +110,8 @@ public final class PrivateInferenceGrpcBindableService
             MetadataParcelFileDescriptorKeys.FILE_DESCRIPTOR_CONTEXT_KEY.get());
     final Timers.Timer inferenceSessionTimer =
         timers.start(PrivateInferenceGrpcTimerNames.PRIVATE_INFERENCE_SESSION_TIMER_NAME);
-    final String callingPackageName = getCallingPackageName();
+    final String callingPackageName =
+        NetworkUsageLogUtils.getCallingPackageNameForLoggingPurposes(context);
 
     // These items are shared between the request and response processors.
     AtomicLong totalRequestSize = new AtomicLong(0);
@@ -162,7 +162,8 @@ public final class PrivateInferenceGrpcBindableService
 
     final Timers.Timer inferenceTimer =
         timers.start(PrivateInferenceGrpcTimerNames.PRIVATE_INFERENCE_TIMER_NAME);
-    final String callingPackageName = getCallingPackageName();
+    final String callingPackageName =
+        NetworkUsageLogUtils.getCallingPackageNameForLoggingPurposes(context);
     String featureName = request.getFeatureName().name();
     long requestSize = request.getData().size();
     AtomicLong responseSize = new AtomicLong(0);
@@ -270,21 +271,6 @@ public final class PrivateInferenceGrpcBindableService
         return authInfo;
       }
     };
-  }
-
-  // PeerUid is used here only for logging. It is NOT used for any security checks.
-  private String getCallingPackageName() {
-    String callingPackageName = "";
-    PeerUid remotePeer = PeerUids.REMOTE_PEER.get();
-    if (remotePeer == null
-        || PeerUids.getInsecurePackagesForUid(context.getPackageManager(), remotePeer) == null) {
-      logger.atWarning().log("Calling package not set in PeerUid.");
-    } else {
-      callingPackageName =
-          PeerUids.getInsecurePackagesForUid(context.getPackageManager(), remotePeer)[0];
-      logger.atFine().log("Received call from package %s", callingPackageName);
-    }
-    return callingPackageName;
   }
 
   private void logInferenceSuccessEvent(PcsPrivateInferenceFeatureName featureName) {

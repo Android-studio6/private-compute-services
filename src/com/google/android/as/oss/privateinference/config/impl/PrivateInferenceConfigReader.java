@@ -28,6 +28,7 @@ import com.google.android.as.oss.common.config.FlagManager.StringFlag;
 import com.google.android.as.oss.privateinference.config.PrivateInferenceConfig;
 import com.google.android.as.oss.privateinference.library.bsa.token.cache.TokenCacheFlag;
 import com.google.android.as.oss.privateinference.library.oakutil.DeviceAttestationFlag;
+import com.google.android.as.oss.privateinference.transport.IpRelayFallbackFlag;
 import com.google.android.as.oss.privateinference.transport.ProxyConfigProviderType;
 import com.google.android.as.oss.privateinference.transport.ProxyConfiguration;
 import com.google.common.flogger.GoogleLogger;
@@ -66,6 +67,11 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
       BooleanFlag.create(
           FLAG_PREFIX + "enable_aratea_token_cache",
           PrivateInferenceConfig.DEFAULT_ENABLE_ARATEA_TOKEN_CACHE);
+
+  static final BooleanFlag ENABLE_ASYNC_TOKEN_CACHE_REFILL =
+      BooleanFlag.create(
+          FLAG_PREFIX + "enable_async_token_cache_refill",
+          PrivateInferenceConfig.DEFAULT_ENABLE_ASYNC_TOKEN_CACHE_REFILL);
 
   static final IntegerFlag PROXY_TOKEN_BATCH_SIZE_FLAG =
       IntegerFlag.create(
@@ -163,6 +169,12 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
           FLAG_PREFIX + "pi_server_channel_idle_timeout_minutes",
           PrivateInferenceConfig.DEFAULT_PI_SERVER_CHANNEL_IDLE_TIMEOUT_MINUTES);
 
+  static final EnumFlag<IpRelayFallbackFlag.Mode> IP_RELAY_FALLBACK_MODE_FLAG =
+      EnumFlag.create(
+          IpRelayFallbackFlag.Mode.class,
+          FLAG_PREFIX + "ip_relay_fallback_mode",
+          PrivateInferenceConfig.DEFAULT_IP_RELAY_FALLBACK_MODE);
+
   private final FlagManager flagManager;
 
   static PrivateInferenceConfigReader create(FlagManager flagManager) {
@@ -198,6 +210,7 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
         // Flags that can be overridden via Device Config flags.
         .setEnabled(flagManager.get(ENABLED_FLAG))
         .setEnableArateaTokenCache(flagManager.get(ENABLE_ARATEA_TOKEN_CACHE))
+        .setEnableAsyncTokenCacheRefill(flagManager.get(ENABLE_ASYNC_TOKEN_CACHE_REFILL))
         .setProxyConfigProviderType(flagManager.get(PROXY_CONFIG_PROVIDER_TYPE_FLAG))
         .setWaitForGrpcChannelReady(flagManager.get(ENABLE_WAIT_FOR_GRPC_CHANNEL_READY_FLAG))
         .setAttachCertificateHeader(flagManager.get(ATTACH_CERTIFICATE_HEADER_FLAG))
@@ -235,6 +248,7 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
             flagManager.get(PROXY_CONFIG_REFRESH_INTERVAL_MINUTES_FLAG))
         .setPiServerChannelIdleTimeoutMinutes(
             flagManager.get(PI_SERVER_CHANNEL_IDLE_TIMEOUT_MINUTES_FLAG))
+        .setIpRelayFallbackMode(flagManager.get(IP_RELAY_FALLBACK_MODE_FLAG))
         .build();
   }
 

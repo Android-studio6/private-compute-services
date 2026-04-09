@@ -124,13 +124,12 @@ internal constructor(
           logger.atInfo().log("Updating proxy configs data store")
           proxyConfigsDataStore.updateData {
             timestampedProxyConfigs {
-              proxyConfigs +=
-                localProxyConfigs.map { config ->
-                  proxyConfig {
-                    url = config.host
-                    port = config.port
-                  }
+              proxyConfigs += localProxyConfigs.map { config ->
+                proxyConfig {
+                  url = config.host
+                  port = config.port
                 }
+              }
               lastUpdated = timeSource.now().toProtoTimestamp()
             }
           }

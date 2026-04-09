@@ -48,8 +48,8 @@ import com.google.android.`as`.oss.feedback.api.gateway.runtimeConfig
 import com.google.android.`as`.oss.feedback.api.gateway.structuredUserInput
 import com.google.android.`as`.oss.feedback.api.gateway.userDonation
 import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.AppInfo
-import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.ModelOutputs
 import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.NotificationContent
+import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.QuartzModelOutputs
 import com.google.android.`as`.oss.feedback.domain.FeedbackSubmissionData
 import com.google.android.`as`.oss.feedback.domain.FeedbackUiState
 import com.google.android.`as`.oss.feedback.quartz.serviceclient.QuartzFeedbackDonationData
@@ -133,7 +133,7 @@ class QuartzDataHelper @Inject constructor() {
                 conversationHistoricMessages = data.notificationData!!.conversationHistoricMessages
               }
             }
-            if (uiState.optInChecked.any { it.key == ModelOutputs && it.value }) {
+            if (uiState.optInChecked.any { it.key == QuartzModelOutputs && it.value }) {
               quartzModelData =
                 if (data.modelData != null) {
                   quartzModelData {
@@ -424,7 +424,7 @@ class QuartzDataHelper @Inject constructor() {
       "${quote("classificationMethod")}: ${quote(quartzModelData.classificationMethod)}, " +
       "${quote("classificationBertCategoryResult")}: ${quote(quartzModelData.classificationBertCategoryResult)}, " +
       "${quote("classificationBertCategoryScore")}: ${quote(quartzModelData.classificationBertCategoryScore)}, " +
-      "${quote("classificationCategory")}: ${quote(quartzModelData.classificationCategory)}" +
+      "${quote("classificationCategory")}: ${quote(quartzModelData.classificationCategory)}, " +
       "${quote("classificationDefaultCategoryResult")}: ${quote(quartzModelData.classificationDefaultCategoryResult)}, " +
       "${quote("defaultCategoryCorrectionThreshold")}: ${quote(quartzModelData.defaultCategoryCorrectionThreshold)}, " +
       "${quote("isSuppressDuplicate")}: ${quote(quartzModelData.isSuppressDuplicate)}" +

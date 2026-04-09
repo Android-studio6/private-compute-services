@@ -21,7 +21,10 @@ package(default_visibility = [
 
 android_library(
     name = "transport",
-    srcs = ["TransportFlag.kt"],
+    srcs = [
+        "IpRelayFallbackFlag.kt",
+        "TransportFlag.kt",
+    ],
     deps = [],
 )
 

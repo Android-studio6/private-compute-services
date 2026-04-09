@@ -716,6 +716,7 @@ private fun MultiEntityFeedbackViewFeedbackScreen(
         modifier = Modifier.padding(horizontal = 16.dp),
         selectedEntityContents = emptyList(),
         feedbackDonationDataResult = donationData,
+        quartzFeedbackDonationDataResult = uiState.quartzFeedbackDonationData,
         onViewDataDisplayed = onViewDataScreenDisplayed,
         onBackPressed = onViewDataScreenBackPressed,
         onDismissRequest = onDismissRequest,

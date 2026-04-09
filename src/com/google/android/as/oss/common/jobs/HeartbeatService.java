@@ -124,7 +124,9 @@ public class HeartbeatService extends Hilt_HeartbeatService {
                             buildFlavor.isRelease()
                                 ? Population.PLATFORM_LOGGING.populationName()
                                 : Population.PLATFORM_LOGGING_DEV.populationName(),
-                            restrictedMetricId));
+                            restrictedMetricId < 0
+                                ? "n" + restrictedMetricId.toString().substring(1)
+                                : restrictedMetricId));
                   }
 
                   @Override
