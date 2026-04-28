@@ -1,0 +1,23 @@
+# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"manual-uncompiled","strict":true,"agent_id":"copilot"}
+# This file was manually prepared because gh/gh-aw CLI is unavailable in this environment.
+# Run `gh aw compile daily-repo-activity-report` to regenerate a fully compiled lock file.
+name: "Daily Repository Activity Report"
+
+on:
+  schedule:
+    - cron: "17 6 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder
+        run: |
+          echo "This lock file must be regenerated with gh-aw compile in a GitHub environment where gh aw is installed."
+          echo "Source workflow: .github/workflows/daily-repo-activity-report.md"
