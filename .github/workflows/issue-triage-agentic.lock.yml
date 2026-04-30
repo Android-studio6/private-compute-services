@@ -1,0 +1,24 @@
+---
+# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"manual-uncompiled","strict":true,"agent_id":"copilot"}
+# This file was manually prepared because gh/gh-aw CLI is unavailable in this environment.
+# Run `gh aw compile issue-triage-agentic` to regenerate a fully compiled lock file.
+name: "Issue Triage Assistant"
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder
+        run: |
+          echo "This lock file must be regenerated with gh-aw compile in a GitHub environment where gh aw is installed."
+          echo "Source workflow: .github/workflows/issue-triage-agentic.md"
