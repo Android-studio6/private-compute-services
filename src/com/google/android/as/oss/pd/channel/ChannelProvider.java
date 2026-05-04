@@ -22,8 +22,11 @@ import java.util.Optional;
 
 /** Provides the GRPC channel for downloading blobs for a specific client. */
 public interface ChannelProvider {
-  Channel getChannel(Client client);
+  ChannelSpec getChannel(Client client);
 
-  // Optional override for API Key.
-  Optional<String> getServiceApiKeyOverride();
+  /** Configuration for a gRPC channel, including the host name and an optional API key. */
+  public record HostConfig(String hostName, Optional<String> apiKeyOverride) {}
+
+  /** Configuration for a gRPC channel, including the channel and an optional API key override. */
+  public record ChannelSpec(Channel channel, Optional<String> apiKeyOverride) {}
 }

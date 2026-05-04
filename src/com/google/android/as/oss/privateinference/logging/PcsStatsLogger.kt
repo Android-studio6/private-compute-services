@@ -25,6 +25,8 @@ interface PcsStatsLogger {
 
   fun logEventLatency(valueMetricId: ValueMetricId, latencyMs: Long)
 
+  fun logEventValue(valueMetricId: ValueMetricId, value: Int)
+
   /**
    * Compute the result of the given block, logging the supplied result status metric after the
    * block completes.

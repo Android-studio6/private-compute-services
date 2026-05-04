@@ -187,7 +187,11 @@ private fun DataCollectionSection(
     var expanded by rememberSaveable { mutableStateOf(false) }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
-      Checkbox(checked = checked, onCheckedChange = onCheckedChange)
+      Checkbox(
+        modifier = Modifier.semantics { this.contentDescription = data.header },
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+      )
 
       Row(
         modifier =

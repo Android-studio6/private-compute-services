@@ -175,6 +175,7 @@ private fun TemplateRendererScope.BeaconWidgetContentV1(
     if (!widget.displayAllCards && isDisplayMoreResultsEnabled) {
       val scope = rememberCoroutineScope()
       WidgetShowAllResultsButton(
+        widget.showMoreResultsButtonUiId,
         if (isDisplayingMoreResults) {
           widget.ctaDisplayFewerResults
         } else {
@@ -283,6 +284,7 @@ private fun TemplateRendererScope.BeaconWidgetContent(
     if (isDisplayMoreResultsEnabled) {
       val scope = rememberCoroutineScope()
       WidgetShowAllResultsButton(
+        widget.showMoreResultsButtonUiId,
         if (isDisplayingMoreResults) {
           widget.ctaDisplayFewerResults
         } else {
@@ -330,7 +332,13 @@ private fun TemplateRendererScope.WidgetAiDisclaimer(
 }
 
 @Composable
-private fun WidgetShowAllResultsButton(ctaDisplayMoreResults: String, onClick: () -> Unit) {
+private fun TemplateRendererScope.WidgetShowAllResultsButton(
+  widgetUiId: UiIdToken,
+  ctaDisplayMoreResults: String,
+  onClick: () -> Unit,
+) {
+  LaunchedEffect(Unit) { doOnImpression(widgetUiId) { logUsage() } }
+
   Button(
     modifier = Modifier.fillMaxWidth(),
     onClick = onClick,

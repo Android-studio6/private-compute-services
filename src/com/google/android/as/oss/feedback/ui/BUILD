@@ -151,9 +151,7 @@ android_library(
     resource_files = glob(["res/**"]),
     deps = [
         "//src/com/google/android/as/oss/delegatedui/service/templates/fonts:flex_fonts",
-        "//src/com/google/android/as/oss/feedback/domain:feedback_ui_state",
         "//src/com/google/android/as/oss/feedback/domain:feedback_view_model",
-        "//src/com/google/android/as/oss/logging/uiusage/api:usage_data_service_kt_proto_lite",
         "//third_party/java/androidx/activity/compose",
         "//third_party/java/androidx/appcompat",
         "//third_party/java/androidx/compose/foundation",
@@ -192,8 +190,10 @@ android_library(
     srcs = ["SameSizeLayout.kt"],
     deps = [
         "//third_party/java/androidx/compose/foundation",
+        "//third_party/java/androidx/compose/foundation/layout",
         "//third_party/java/androidx/compose/runtime",
         "//third_party/java/androidx/compose/ui",
+        "//third_party/java/androidx/compose/ui/unit",
     ],
 )
 
@@ -204,6 +204,7 @@ android_library(
         "//third_party/java/androidx/compose/foundation",
         "//third_party/java/androidx/compose/runtime",
         "//third_party/java/androidx/compose/ui",
+        "//third_party/java/androidx/compose/ui/unit",
     ],
 )
 
@@ -228,9 +229,13 @@ android_library(
         "//src/com/google/android/as/oss/feedback/domain:ground_truth_data",
         "//src/com/google/android/as/oss/feedback/proto:feedback_tag_data_kt_proto_lite",
         "//third_party/java/androidx/compose/foundation",
+        "//third_party/java/androidx/compose/foundation/layout",
+        "//third_party/java/androidx/compose/material/icons_core",
         "//third_party/java/androidx/compose/material3",
         "//third_party/java/androidx/compose/runtime",
         "//third_party/java/androidx/compose/ui",
+        "//third_party/java/androidx/compose/ui/unit",
+        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-jvm",
     ],
 )
 
@@ -240,8 +245,12 @@ android_library(
     deps = [
         "//src/com/google/android/as/oss/feedback/domain:ground_truth_data",
         "//third_party/java/androidx/compose/foundation",
+        "//third_party/java/androidx/compose/foundation/layout",
+        "//third_party/java/androidx/compose/material/icons_core",
         "//third_party/java/androidx/compose/material3",
         "//third_party/java/androidx/compose/runtime",
         "//third_party/java/androidx/compose/ui",
+        "//third_party/java/androidx/compose/ui/unit",
+        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-jvm",
     ],
 )

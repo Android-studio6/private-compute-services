@@ -24,6 +24,8 @@ android_library(
     visibility = ["//visibility:public"],
     deps = [
         "//java/com/google/android/settings/search",
+        "//src/com/google/android/as/oss/common",
+        "//src/com/google/android/as/oss/common/initializer",
         "//src/com/google/android/as/oss/logging:api",
         "//src/com/google/android/as/oss/logging:atoms_java_proto_lite",
         "//src/com/google/android/as/oss/logging:enums_java_proto_lite",

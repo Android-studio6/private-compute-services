@@ -51,6 +51,7 @@ android_library(
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
         "@maven//:io_grpc_grpc_api",
+        "@maven//:javax_inject_javax_inject",
     ],
 )
 
@@ -87,6 +88,7 @@ android_library(
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
         "@maven//:io_grpc_grpc_api",
+        "@maven//:javax_inject_javax_inject",
     ],
 )
 

@@ -68,6 +68,7 @@ android_library(
         "//third_party/java/androidx/appcompat",
         "//third_party/java/androidx/compose/foundation/layout",
         "//third_party/java/androidx/compose/runtime",
+        "//third_party/java/androidx/compose/ui",
         "//third_party/java/androidx/lifecycle/viewmodel_compose",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_flogger_google_extensions",

@@ -166,6 +166,11 @@ abstract class NetworkUsageLogContentModule {
                 .descriptionId(R.string.description_live_caption)
                 .build(),
             asiHttpEntryBuilder
+                .connectionKeyStringId(R.string.url_regex_live_caption_mdd_edgedl)
+                .featureNameId(R.string.feature_name_live_caption)
+                .descriptionId(R.string.description_live_caption)
+                .build(),
+            asiHttpEntryBuilder
                 .connectionKeyStringId(R.string.url_regex_live_translate)
                 .featureNameId(R.string.feature_name_live_translate)
                 .descriptionId(R.string.description_live_translate_http)
@@ -343,6 +348,14 @@ abstract class NetworkUsageLogContentModule {
                 .connectionKeyString(IPProtectionRequestType.IPP_GET_ANONYMOUS_TOKEN.name())
                 .featureNameId(R.string.feature_name_ip_protection)
                 .descriptionId(R.string.description_ipp_get_anonymous_token)
+                .build(),
+            piEntryBuilder
+                .packageName(AICORE_PACKAGE_NAME)
+                .connectionKeyString(
+                    PcsPrivateInferenceFeatureName.FEATURE_NAME_GBOARD_CONVERSATIONAL_WRITING_TOOLS
+                        .name())
+                .featureNameId(R.string.feature_name_gboard_conversational_writing_tools)
+                .descriptionId(R.string.description_pi_gboard_conversational_writing_tools)
                 .build(),
             asiHttpEntryBuilder
                 .connectionKeyStringId(R.string.url_regex_quick_tap)

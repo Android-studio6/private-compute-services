@@ -43,6 +43,7 @@ pcs_dev_and_mpm(
         "//src/com/google/android/as/oss/conversationid",
         "//src/com/google/android/as/oss/dataattribution:prod_modules",  # buildcleaner: keep
         "//src/com/google/android/as/oss/delegatedui:prod_modules",  # buildcleaner: keep
+        "//src/com/google/android/as/oss/features/optin:prod_modules",  # buildcleaner: keep
         "//src/com/google/android/as/oss/feedback:prod_modules",  # buildcleaner: keep
         "//src/com/google/android/as/oss/feedback/gateway/service",  # buildcleaner: keep
         "//src/com/google/android/as/oss/fl:federated_module",
@@ -66,6 +67,7 @@ pcs_dev_and_mpm(
         "//src/com/google/android/as/oss/http/config/impl",  # buildcleaner: keep
         "//src/com/google/android/as/oss/http/service",  # buildcleaner: keep
         "//src/com/google/android/as/oss/logging/impl:impl_module",
+        "//src/com/google/android/as/oss/networkusage/config/impl",
         "//src/com/google/android/as/oss/networkusage/db/impl",
         "//src/com/google/android/as/oss/networkusage/ui/content/impl:public_module",
         "//src/com/google/android/as/oss/networkusage/ui/user",

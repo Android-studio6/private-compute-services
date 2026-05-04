@@ -34,7 +34,6 @@ android_library(
         "//src/com/google/android/as/oss/delegatedui/service/data/serviceconnection:annotations",
         "//src/com/google/android/as/oss/delegatedui/utils:parcelable_over_rpc",
         "//src/com/google/android/as/oss/delegatedui/utils:response_with_parcelables",
-        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-jvm",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
         "@maven//:com_google_flogger_google_extensions",

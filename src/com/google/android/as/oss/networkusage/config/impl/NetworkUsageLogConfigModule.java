@@ -21,11 +21,14 @@ import static com.google.android.as.oss.common.Executors.GENERAL_SINGLE_THREAD_E
 import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.config.FlagManagerFactory;
 import com.google.android.as.oss.common.config.FlagNamespace;
+import com.google.android.as.oss.common.initializer.PcsInitializer;
 import com.google.android.as.oss.networkusage.config.NetworkUsageLogConfig;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
+import dagger.multibindings.IntoSet;
 
 /** Module that provides ConfigReader for Network Usage Log. */
 @Module
@@ -38,4 +41,9 @@ public interface NetworkUsageLogConfigModule {
         flagManagerFactory.create(
             FlagNamespace.DEVICE_PERSONALIZATION_SERVICES, GENERAL_SINGLE_THREAD_EXECUTOR));
   }
+
+  @Binds
+  @IntoSet
+  PcsInitializer bindSearchIndexablesProviderTogglier(
+      NetworkUsageSearchIndexablesProviderTogglier togglier);
 }

@@ -20,12 +20,8 @@ android_library(
     name = "message_armour_data_helper",
     srcs = ["MessageArmourDataHelper.kt"],
     deps = [
-        "//google/protobuf:timestamp_kt_proto_lite",
-        "//src/com/google/android/as/oss/feedback/domain:feedback_ui_state",
-        "//src/com/google/android/as/oss/feedback/proto:feedback_tag_data_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/proto/gateway:message_armour_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/proto/gateway:pixel_apex_api_kt_proto_lite",
-        "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:javax_inject_javax_inject",
     ],

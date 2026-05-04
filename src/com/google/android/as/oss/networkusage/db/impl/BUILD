@@ -48,6 +48,7 @@ android_library(
         "//src/com/google/android/as/oss/networkusage/db:repository",
         "//src/com/google/android/as/oss/networkusage/ui/content",
         "//src/com/google/android/as/oss/networkusage/ui/user:res_lib",
+        "//third_party/java/androidx/room:room-android",
         "//third_party/java/auto:auto_value",
         "//third_party/java/auto:auto_value_parcel_adapter",
         "@maven//:androidx_annotation_annotation",

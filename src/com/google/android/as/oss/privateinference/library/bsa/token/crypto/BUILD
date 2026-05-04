@@ -44,7 +44,7 @@ android_library(
         "//third_party/java/androidx/core/ktx",
         "//third_party/java/okio:okio_android",
         "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-android",
-        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines_guava",
+        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines_guava-android",
         "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_crypto_tink_tink_android",
         "@maven//:com_google_dagger_dagger",
@@ -65,5 +65,6 @@ android_library(
         "//src/com/google/android/as/oss/common/initializer",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
+        "@maven//:javax_inject_javax_inject",
     ],
 )

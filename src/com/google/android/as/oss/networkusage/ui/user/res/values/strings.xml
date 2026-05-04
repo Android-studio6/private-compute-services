@@ -139,6 +139,7 @@
   <!-- Description of downloads consisting of Live Caption models, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="description_live_caption">Updated the on-device Live Caption model</string>
   <string name="url_regex_live_caption" translatable="false">https://storage.googleapis.com/captions/.*</string>
+  <string name="url_regex_live_caption_mdd_edgedl" translatable="false">https://edgedl.me.gvt1.com/edgedl/mdi-serving/live-caption/.*</string>
 
   <!-- Live Translate -->
   <!-- Name of the Live Translate feature which is part of Private Compute Core, displayed in the network usage log. "Live Translate" is the product name. [CHAR_LIMIT=NONE] -->
@@ -379,6 +380,10 @@
   <string name="feature_name_screenshots_response_generation">Response generation</string>
   <!-- Description of the Response Generation feature for Screenshots, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="description_pi_screenshots_response_generation">Response generation was performed in a Private AI Compute environment.</string>
+  <!-- Name of the Gboard conversational writing tools feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_gboard_conversational_writing_tools">Gboard conversational writing tools</string>
+  <!-- Description of the Gboard conversational writing tools feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_pi_gboard_conversational_writing_tools">Text input was processed in a Private AI Compute environment.</string>
 
   <!-- IP protection for Private Inference. [CHAR LIMIT=NONE] -->
   <string name="feature_name_ip_protection">IP protection</string>

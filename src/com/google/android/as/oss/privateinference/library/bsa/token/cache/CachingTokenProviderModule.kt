@@ -19,6 +19,7 @@ package com.google.android.`as`.oss.privateinference.library.bsa.token.cache
 import com.google.android.`as`.oss.common.CoroutineQualifiers.ApplicationScope
 import com.google.android.`as`.oss.common.config.ConfigReader
 import com.google.android.`as`.oss.common.time.TimeSource
+import com.google.android.`as`.oss.logging.PcsStatsEnums.ValueMetricId
 import com.google.android.`as`.oss.privateinference.config.PrivateInferenceConfig
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaTokenWithoutChallenge
 import com.google.android.`as`.oss.privateinference.library.bsa.token.BsaTokenProvider
@@ -28,6 +29,9 @@ import com.google.android.`as`.oss.privateinference.library.bsa.token.ProxyToken
 import com.google.android.`as`.oss.privateinference.library.bsa.token.cache.db.BsaTokenDatabase
 import com.google.android.`as`.oss.privateinference.library.bsa.token.cache.db.DatabaseTokenPool
 import com.google.android.`as`.oss.privateinference.library.bsa.token.crypto.BsaTokenCipher
+import com.google.android.`as`.oss.privateinference.logging.PcsStatsLogger
+import com.google.android.`as`.oss.privateinference.service.ArateaTokenUtilizationMetricId
+import com.google.android.`as`.oss.privateinference.service.ProxyTokenUtilizationMetricId
 import dagger.Lazy
 import dagger.Module
 import dagger.Provides
@@ -140,6 +144,8 @@ internal object CachingTokenProviderModule {
     cipher: BsaTokenCipher,
     database: Lazy<BsaTokenDatabase>,
     timeSource: TimeSource,
+    pcsStatsLogger: PcsStatsLogger,
+    @ProxyTokenUtilizationMetricId tokenUtilizationMetricId: ValueMetricId,
   ): BsaTokenProvider<ProxyToken> =
     CachingBsaTokenProvider(
       coroutineScope = coroutineScope,
@@ -154,6 +160,8 @@ internal object CachingTokenProviderModule {
           timeSource = timeSource,
           enableAsyncTokenCacheRefill = configReader.config.enableAsyncTokenCacheRefill(),
           coroutineScope = coroutineScope,
+          pcsStatsLogger = pcsStatsLogger,
+          tokenUtilizationMetricId = tokenUtilizationMetricId,
         ),
     )
 
@@ -191,6 +199,8 @@ internal object CachingTokenProviderModule {
     cipher: BsaTokenCipher,
     database: Lazy<BsaTokenDatabase>,
     timeSource: TimeSource,
+    pcsStatsLogger: PcsStatsLogger,
+    @ArateaTokenUtilizationMetricId tokenUtilizationMetricId: ValueMetricId,
   ): BsaTokenProvider<ArateaTokenWithoutChallenge> =
     CachingBsaTokenProvider(
       coroutineScope = coroutineScope,
@@ -205,6 +215,8 @@ internal object CachingTokenProviderModule {
           timeSource = timeSource,
           enableAsyncTokenCacheRefill = configReader.config.enableAsyncTokenCacheRefill(),
           coroutineScope = coroutineScope,
+          pcsStatsLogger = pcsStatsLogger,
+          tokenUtilizationMetricId = tokenUtilizationMetricId,
         ),
     )
 

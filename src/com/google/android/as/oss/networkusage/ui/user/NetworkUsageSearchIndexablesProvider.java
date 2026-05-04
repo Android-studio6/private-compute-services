@@ -43,12 +43,23 @@ public class NetworkUsageSearchIndexablesProvider extends SearchIndexablesProvid
   public Cursor queryRawData(String[] projection) {
     var cursor = new MatrixCursor(SearchIndexablesContract.INDEXABLES_RAW_COLUMNS);
     Context context = getContext();
-    if (context == null || !isDeveloperOptionsEnabled(context)) {
+    if (context == null) {
       return cursor;
     }
 
     cursor.addRow(createIndexableRow(context));
     return cursor;
+  }
+
+  @Override
+  public Cursor queryNonIndexableKeys(String[] projection) {
+    Context context = getContext();
+    if (context != null && !isDeveloperOptionsEnabled(context)) {
+      MatrixCursor cursor = new MatrixCursor(SearchIndexablesContract.NON_INDEXABLES_KEYS_COLUMNS);
+      cursor.addRow(new String[] {context.getString(R.string.pref_network_usage_log_settings_key)});
+      return cursor;
+    }
+    return new MatrixCursor(SearchIndexablesContract.NON_INDEXABLES_KEYS_COLUMNS);
   }
 
   private Object[] createIndexableRow(Context context) {
@@ -73,10 +84,5 @@ public class NetworkUsageSearchIndexablesProvider extends SearchIndexablesProvid
     return Settings.Global.getInt(
             context.getContentResolver(), Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0)
         == 1;
-  }
-
-  @Override
-  public Cursor queryNonIndexableKeys(String[] projection) {
-    return new MatrixCursor(SearchIndexablesContract.INDEXABLES_XML_RES_COLUMNS);
   }
 }

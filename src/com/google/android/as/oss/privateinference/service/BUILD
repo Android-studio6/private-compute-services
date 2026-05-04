@@ -75,7 +75,6 @@ android_library(
         "//src/com/google/android/as/oss/common/config",
         "//src/com/google/android/as/oss/common/flavor",
         "//src/com/google/android/as/oss/grpc:annotations",
-        "//src/com/google/android/as/oss/logging:atoms_java_proto_lite",
         "//src/com/google/android/as/oss/logging:enums_java_proto_lite",
         "//src/com/google/android/as/oss/networkusage/db",
         "//src/com/google/android/as/oss/privateinference/config",
@@ -145,6 +144,7 @@ android_library(
         "//src/com/google/android/as/oss/privateinference/service/api:private_inference_java_proto_lite",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
+        "@maven//:javax_inject_javax_inject",
     ],
 )
 
@@ -159,6 +159,7 @@ android_library(
         "//src/com/google/android/as/oss/privateinference/service/api:private_inference_java_proto_lite",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
+        "@maven//:javax_inject_javax_inject",
     ],
 )
 

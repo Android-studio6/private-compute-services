@@ -26,6 +26,7 @@ import com.google.protobuf.ByteString
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.security.KeyPairGenerator
 import java.security.KeyStore
+import java.security.ProviderException
 import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -95,16 +96,31 @@ constructor(@ApplicationContext context: Context) {
         .build()
     )
 
-    // Generate the key pair. This will result in calls to both generate_key() and
-    // attest_key() at the keymaster2 HAL.
-    val unused = keyPairGenerator.generateKeyPair()
+    try {
+      // Generate the key pair. This will result in calls to both generate_key() and
+      // attest_key() at the keymaster2 HAL.
+      // On devices/emulators without hardware-backed attestation support,
+      // AndroidKeyStoreKeyPairGeneratorSpi throws a ProviderException. In that case we fall back
+      // to dummy bytes so that local debug flows can continue without real attestation hardware.
+      val unused = keyPairGenerator.generateKeyPair()
 
-    // Get the certificate chain
-    val keyStore = KeyStore.getInstance(ANDROID_KEY_STORE)
-    keyStore.load(null)
+      // Get the certificate chain
+      val keyStore = KeyStore.getInstance(ANDROID_KEY_STORE)
+      keyStore.load(null)
 
-    (keyStore.getCertificateChain(ANDROID_KEY_STORE_ALIAS) ?: emptyArray()).map {
-      ByteString.copyFrom(it.encoded)
+      (keyStore.getCertificateChain(ANDROID_KEY_STORE_ALIAS) ?: emptyArray()).map {
+        ByteString.copyFrom(it.encoded)
+      }
+    } catch (e: ProviderException) {
+      logger
+        .atWarning()
+        .withCause(e)
+        .log(
+          "KeyStore attestation failed (AndroidKeyStoreKeyPairGeneratorSpi.generateKeyPair). " +
+            "Falling back to placeholder attestation bytes. " +
+            "This is expected on emulators and devices without hardware attestation support."
+        )
+      listOf(PLACEHOLDER_ATTESTATION_BYTES)
     }
   }
 
@@ -117,5 +133,14 @@ constructor(@ApplicationContext context: Context) {
     private const val ANDROID_KEY_STORE_ALIAS = "PiAttestationKey"
 
     private const val DEVICE_ID_FEATURE_NAME = "android.software.device_id_attestation"
+
+    /**
+     * A placeholder attestation byte string used as a fallback when [generateAttestation] fails.
+     *
+     * Deliberately an invalid attestation value so the server will always reject it — it cannot
+     * accidentally pass production verification.
+     */
+    private val PLACEHOLDER_ATTESTATION_BYTES: ByteString =
+      ByteString.copyFromUtf8("PLACEHOLDER_ATTESTATION_FOR_LOCAL_DEBUG")
   }
 }

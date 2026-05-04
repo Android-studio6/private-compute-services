@@ -50,6 +50,10 @@ internal object LoggingMetricIdMapReleaseModule {
         CountMetricId.PCS_PI_PSI_MINI_RESPONSE_GENERATION_SUCCESS,
       PcsPrivateInferenceFeatureName.FEATURE_NAME_PSI_SCREENSHOT_MEMORY_GENERATION to
         CountMetricId.PCS_PI_PSI_SCREENSHOT_MEMORY_GENERATION_SUCCESS,
+      PcsPrivateInferenceFeatureName.FEATURE_NAME_GBOARD_CONVERSATIONAL_WRITING_TOOLS to
+        CountMetricId.PCS_PI_GBOARD_CONVERSATIONAL_WRITING_TOOLS_SUCCESS,
+      PcsPrivateInferenceFeatureName.FEATURE_NAME_SOLTAIRE_SD to
+        CountMetricId.PCS_PI_SOLTAIRE_SD_SUCCESS,
     )
 
   @Provides
@@ -72,6 +76,10 @@ internal object LoggingMetricIdMapReleaseModule {
         CountMetricId.PCS_PI_PSI_MINI_RESPONSE_GENERATION_FAILURE,
       PcsPrivateInferenceFeatureName.FEATURE_NAME_PSI_SCREENSHOT_MEMORY_GENERATION to
         CountMetricId.PCS_PI_PSI_SCREENSHOT_MEMORY_GENERATION_FAILURE,
+      PcsPrivateInferenceFeatureName.FEATURE_NAME_GBOARD_CONVERSATIONAL_WRITING_TOOLS to
+        CountMetricId.PCS_PI_GBOARD_CONVERSATIONAL_WRITING_TOOLS_FAILURE,
+      PcsPrivateInferenceFeatureName.FEATURE_NAME_SOLTAIRE_SD to
+        CountMetricId.PCS_PI_SOLTAIRE_SD_FAILURE,
     )
 
   @Provides
@@ -94,6 +102,10 @@ internal object LoggingMetricIdMapReleaseModule {
         ValueMetricId.PCS_PI_PSI_MINI_RESPONSE_GENERATION_LATENCY_MS,
       PcsPrivateInferenceFeatureName.FEATURE_NAME_PSI_SCREENSHOT_MEMORY_GENERATION to
         ValueMetricId.PCS_PI_PSI_SCREENSHOT_MEMORY_GENERATION_LATENCY_MS,
+      PcsPrivateInferenceFeatureName.FEATURE_NAME_GBOARD_CONVERSATIONAL_WRITING_TOOLS to
+        ValueMetricId.PCS_PI_GBOARD_CONVERSATIONAL_WRITING_TOOLS_LATENCY_MS,
+      PcsPrivateInferenceFeatureName.FEATURE_NAME_SOLTAIRE_SD to
+        ValueMetricId.PCS_PI_SOLTAIRE_SD_LATENCY_MS,
     )
 
   @Provides
@@ -116,5 +128,21 @@ internal object LoggingMetricIdMapReleaseModule {
         ValueMetricId.PCS_PI_PSI_MINI_RESPONSE_GENERATION_FAILURE_LATENCY_MS,
       PcsPrivateInferenceFeatureName.FEATURE_NAME_PSI_SCREENSHOT_MEMORY_GENERATION to
         ValueMetricId.PCS_PI_PSI_SCREENSHOT_MEMORY_GENERATION_FAILURE_LATENCY_MS,
+      PcsPrivateInferenceFeatureName.FEATURE_NAME_GBOARD_CONVERSATIONAL_WRITING_TOOLS to
+        ValueMetricId.PCS_PI_GBOARD_CONVERSATIONAL_WRITING_TOOLS_FAILURE_LATENCY_MS,
+      PcsPrivateInferenceFeatureName.FEATURE_NAME_SOLTAIRE_SD to
+        ValueMetricId.PCS_PI_SOLTAIRE_SD_FAILURE_LATENCY_MS,
     )
+
+  @Provides
+  @Singleton
+  @ProxyTokenUtilizationMetricId
+  fun provideProxyTokenUtilizationMetricId(): ValueMetricId =
+    ValueMetricId.PCS_PI_PROXY_TOKEN_UTILIZATION_RATIO
+
+  @Provides
+  @Singleton
+  @ArateaTokenUtilizationMetricId
+  fun provideArateaTokenUtilizationMetricId(): ValueMetricId =
+    ValueMetricId.PCS_PI_ARATEA_TOKEN_UTILIZATION_RATIO
 }

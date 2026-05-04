@@ -45,10 +45,12 @@ android_library(
     deps = [
         ":db",
         "//src/com/google/android/as/oss/common/time",
+        "//src/com/google/android/as/oss/logging:enums_java_proto_lite",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token:token_provider",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token/cache:token_pool",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token/crypto",
+        "//src/com/google/android/as/oss/privateinference/logging",
         "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-android",
     ],
 )

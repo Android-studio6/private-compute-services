@@ -30,11 +30,9 @@ android_library(
     deps = [
         "//src/com/google/android/as/oss/common/config",
         "//src/com/google/android/as/oss/dataattribution/proto:attribution_chip_header_kt_proto_lite",
-        "//src/com/google/android/as/oss/delegatedui/api/common:common_kt_proto_lite",
         "//src/com/google/android/as/oss/delegatedui/api/infra/dataservice:data_service_kt_proto_lite",
         "//src/com/google/android/as/oss/delegatedui/api/integration/egress/bugle:bugle_egress_kt_proto_lite",
         "//src/com/google/android/as/oss/delegatedui/api/integration/templates:templates_kt_proto_lite",
-        "//src/com/google/android/as/oss/delegatedui/api/integration/templates:ui_id_token_kt_proto_lite",
         "//src/com/google/android/as/oss/delegatedui/api/integration/templates/bugle:bugle_template_kt_proto_lite",
         "//src/com/google/android/as/oss/delegatedui/config",
         "//src/com/google/android/as/oss/delegatedui/service/common",

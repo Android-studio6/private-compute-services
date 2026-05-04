@@ -41,6 +41,12 @@ class PcsStatsLoggerImpl @Inject constructor(private val pcsStatsLog: PcsStatsLo
     )
   }
 
+  override fun logEventValue(valueMetricId: ValueMetricId, value: Int) {
+    pcsStatsLog.logIntelligenceValueReported(
+      IntelligenceValueReported.newBuilder().setValueMetricId(valueMetricId).setValue(value).build()
+    )
+  }
+
   /**
    * Compute the result of the given block, logging the supplied result status metric after the
    * block completes.

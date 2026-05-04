@@ -18,13 +18,12 @@ package com.google.android.as.oss.pd.channel.impl;
 
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.Client;
 import com.google.android.as.oss.pd.channel.ChannelProvider;
+import com.google.android.as.oss.pd.channel.ChannelProvider.HostConfig;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
-import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
-import java.util.Optional;
 
 /**
  * A simple {@link com.google.android.as.oss.pd.channel.ChannelProvider} that caches the returned
@@ -35,37 +34,31 @@ class ChannelProviderImpl implements ChannelProvider {
   private static final int SERVER_PORT = 443;
   private static final int MAX_RESPONSE_SIZE_IN_BYTES = 32 * 1024 * 1024; // Max download size: 32MB
 
-  private final LoadingCache<Client, Channel> channelCache;
-  private final Optional<String> apiKeyOverride;
+  private final LoadingCache<Client, ChannelSpec> channelCache;
 
-  ChannelProviderImpl(
-      ImmutableMap<Client, String> hostNames,
-      String defaultHostName,
-      Optional<String> apiKeyOverride) {
-    this.apiKeyOverride = apiKeyOverride;
+  ChannelProviderImpl(ImmutableMap<Client, HostConfig> hostConfigs, HostConfig defaultHostConfig) {
     this.channelCache =
         CacheBuilder.newBuilder()
-            .build(CacheLoader.from(client -> buildChannelFor(hostNames, client, defaultHostName)));
+            .build(
+                CacheLoader.from(
+                    client -> buildChannelSpecFor(hostConfigs, client, defaultHostConfig)));
   }
 
   @Override
-  public Channel getChannel(Client client) {
+  public ChannelSpec getChannel(Client client) {
     // Using getUnchecked since no checked exception is thrown from the loading function
     return channelCache.getUnchecked(client);
   }
 
-  @Override
-  public Optional<String> getServiceApiKeyOverride() {
-    return apiKeyOverride;
-  }
-
   // Implemented as a static method instead of an instance method to avoid "under-initialization"
   // errors by the static analysis tools.
-  private static Channel buildChannelFor(
-      ImmutableMap<Client, String> hostNames, Client client, String defaultHostName) {
-    String hostName = hostNames.getOrDefault(client, defaultHostName);
-    return ManagedChannelBuilder.forAddress(hostName, SERVER_PORT)
-        .maxInboundMessageSize(MAX_RESPONSE_SIZE_IN_BYTES)
-        .build();
+  private static ChannelSpec buildChannelSpecFor(
+      ImmutableMap<Client, HostConfig> hostConfigs, Client client, HostConfig defaultHostConfig) {
+    HostConfig hostConfig = hostConfigs.getOrDefault(client, defaultHostConfig);
+    return new ChannelSpec(
+        ManagedChannelBuilder.forAddress(hostConfig.hostName(), SERVER_PORT)
+            .maxInboundMessageSize(MAX_RESPONSE_SIZE_IN_BYTES)
+            .build(),
+        hostConfig.apiKeyOverride());
   }
 }

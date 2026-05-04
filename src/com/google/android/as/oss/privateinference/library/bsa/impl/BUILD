@@ -45,7 +45,7 @@ kt_jvm_library_with_nullness_check(
         "//src/com/google/android/as/oss/privateinference/library/bsa/token:token_jvm",
         "//src/com/google/android/as/oss/privateinference/library/oakutil:private_inference_client_timer_names_jvm",
         "//src/com/google/android/as/oss/privateinference/util/timers:timer_set_jvm",
-        "//third_party/java/protobuf",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -65,7 +65,6 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:io_grpc_grpc_api",
-        "@maven//:javax_inject_javax_inject",
     ],
 )
 
@@ -89,7 +88,6 @@ kt_jvm_library_with_nullness_check(
         "//third_party/java/grpc:core",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_errorprone_error_prone_annotations",
-        "@maven//:javax_inject_javax_inject",
     ],
 )
 
@@ -102,6 +100,7 @@ android_library(
         "//src/com/google/android/as/oss/privateinference/library/oakutil:device_attestation_flag",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 

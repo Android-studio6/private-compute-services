@@ -34,7 +34,7 @@ android_library(
     deps = [
         "//src/com/google/android/as/oss/privateinference/library/bsa:blind_sign_auth",
         "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-android",
-        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines_guava",
+        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines_guava-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:com_google_guava_guava",
@@ -51,14 +51,14 @@ kt_jvm_library_with_nullness_check(
         "//src/com/google/android/as/oss/privateinference/library/bsa/impl:__subpackages__",
     ],
     deps = [
+        "//java/com/google/common/util/concurrent",
         "//src/com/google/android/as/oss/privateinference/library/bsa:blind_sign_auth_jvm",
         "//third_party/java/flogger",
         "//third_party/java/grpc:core",
-        "//third_party/java/protobuf",
-        "//third_party/kotlin/kotlinx_coroutines",
+        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-jvm",
         "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines_guava-jvm",
         "@maven//:com_google_errorprone_error_prone_annotations",
-        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
@@ -112,8 +112,6 @@ cc_library(
         ":jni_global_ref",
         ":jni_helpers",
         ":jni_logging",
-        "//third_party/absl/cleanup",
-        "//third_party/absl/functional:any_invocable",
         "//third_party/absl/status",
         "//third_party/absl/status:statusor",
         "//third_party/absl/strings",

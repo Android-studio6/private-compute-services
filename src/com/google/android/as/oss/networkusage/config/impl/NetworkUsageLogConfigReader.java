@@ -29,6 +29,9 @@ class NetworkUsageLogConfigReader extends AbstractConfigReader<NetworkUsageLogCo
   static final BooleanFlag ENABLE_NETWORK_USAGE_LOG =
       BooleanFlag.create("PcsNetworkUsageLog__enable_network_usage_log", false);
 
+  static final BooleanFlag ENABLE_SEARCH_INDEXABLES_PROVIDER =
+      BooleanFlag.create("PcsNetworkUsageLog__enable_search_indexables_provider", false);
+
   static final BooleanFlag REJECT_UNKNOWN_REQUESTS =
       BooleanFlag.create("PcsNetworkUsageLog__reject_unknown_requests", false);
 
@@ -54,6 +57,8 @@ class NetworkUsageLogConfigReader extends AbstractConfigReader<NetworkUsageLogCo
   protected NetworkUsageLogConfig computeConfig() {
     return NetworkUsageLogConfig.builder()
         .setNetworkUsageLogEnabled(flagManager.get(ENABLE_NETWORK_USAGE_LOG))
+        .setNetworkUsageSearchIndexablesProviderEnabled(
+            flagManager.get(ENABLE_SEARCH_INDEXABLES_PROVIDER))
         .setRejectUnknownRequests(flagManager.get(REJECT_UNKNOWN_REQUESTS))
         .build();
   }

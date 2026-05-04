@@ -26,10 +26,7 @@ android_library(
     srcs = [
         "PcsStatsLogger.kt",
     ],
-    deps = [
-        "//src/com/google/android/as/oss/logging:enums_java_proto_lite",
-        "@maven//:com_google_dagger_dagger",
-    ],
+    deps = ["//src/com/google/android/as/oss/logging:enums_java_proto_lite"],
 )
 
 android_library(
@@ -41,7 +38,6 @@ android_library(
         "//src/com/google/android/as/oss/logging:api",
         "//src/com/google/android/as/oss/logging:atoms_java_proto_lite",
         "//src/com/google/android/as/oss/logging:enums_java_proto_lite",
-        "@maven//:com_google_dagger_dagger",
         "@maven//:javax_inject_javax_inject",
     ],
 )
@@ -54,6 +50,7 @@ android_library(
         ":logging_impl",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
+        "@maven//:javax_inject_javax_inject",
     ],
 )
 
@@ -65,7 +62,6 @@ android_library(
     ],
     deps = [
         ":logging",
-        "//src/com/google/android/as/oss/logging:atoms_java_proto_lite",
         "//src/com/google/android/as/oss/logging:enums_java_proto_lite",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",

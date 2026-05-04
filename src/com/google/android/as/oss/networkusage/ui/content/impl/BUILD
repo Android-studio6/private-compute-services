@@ -30,7 +30,6 @@ android_library(
         "//src/com/google/android/as/oss/networkusage/ui/user:res_lib",
         "//third_party/java/auto:auto_value",
         "@maven//:androidx_annotation_annotation",
-        "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_flogger_google_extensions",

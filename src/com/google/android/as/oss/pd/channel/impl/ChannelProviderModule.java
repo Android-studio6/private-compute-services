@@ -18,6 +18,7 @@ package com.google.android.as.oss.pd.channel.impl;
 
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.Client;
 import com.google.android.as.oss.pd.channel.ChannelProvider;
+import com.google.android.as.oss.pd.channel.ChannelProvider.HostConfig;
 import com.google.common.collect.ImmutableMap;
 import dagger.Module;
 import dagger.Provides;
@@ -31,15 +32,15 @@ import javax.inject.Singleton;
 @InstallIn(SingletonComponent.class)
 abstract class ChannelProviderModule {
 
-  private static final ImmutableMap<Client, String> HOST_NAMES = ImmutableMap.of();
-  private static final String DEFAULT_HOST_NAME = "ondevicesafety-pa.googleapis.com";
+  private static final ImmutableMap<Client, HostConfig> HOST_CONFIGS = ImmutableMap.of();
+  private static final String PROD_HOST_NAME = "ondevicesafety-pa.googleapis.com";
+
+  private static final HostConfig PROD_HOST_CONFIG =
+      new HostConfig(PROD_HOST_NAME, /* apiKeyOverride= */ Optional.empty());
 
   @Singleton
   @Provides
   static ChannelProvider provideChannelProvider() {
-    return new ChannelProviderImpl(
-        HOST_NAMES,
-        /* defaultHostName= */ DEFAULT_HOST_NAME,
-        /* apiKeyOverride= */ Optional.empty());
+    return new ChannelProviderImpl(HOST_CONFIGS, /* defaultHostConfig= */ PROD_HOST_CONFIG);
   }
 }

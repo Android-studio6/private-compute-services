@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("//devtools/rust/build_defs:rules.bzl", "rust_library")
 load("//mobile/build:build_defs.bzl", "android_jni_library")
-load("//third_party/bazel_rules/rules_rust/rust:defs.bzl", "rust_library")
 
 package(
     default_applicable_licenses = ["//third_party/oak:license"],

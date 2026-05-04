@@ -12,53 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_rules_android//android:rules.bzl", "android_library")
 load("//third_party/protobuf/bazel:java_lite_proto_library.bzl", "java_lite_proto_library")
 load("//third_party/protobuf/bazel:proto_library.bzl", "proto_library")
 load("//third_party/protobuf/build_defs:kt_jvm_proto_library.bzl", "kt_jvm_lite_proto_library")
+load("//tools/build_defs/kotlin:rules.bzl", "kt_jvm_grpc_library")
 
-package(default_visibility = ["//visibility:public"])
+package(default_visibility = [
+    "//javatests/com/google/android/apps/miphone/pcs/features/optin/service:__subpackages__",
+    "//src/com/google/android/as/oss/features/optin/client:__subpackages__",
+    "//visibility:public",
+])
 
 proto_library(
-    name = "enums_proto",
-    srcs = [
-        "enums.proto",
-    ],
-    option_deps = ["//third_party/java/protobuf:java_features_proto"],
+    name = "opt_in_service_proto",
+    srcs = ["opt_in_service.proto"],
+    has_services = True,
+    deps = [""],
+)
+
+java_lite_proto_library(
+    name = "opt_in_service_java_proto_lite",
+    deps = [":opt_in_service_proto"],
 )
 
 kt_jvm_lite_proto_library(
-    name = "enums_kt_proto_lite",
-    deps = [":enums_proto"],
+    name = "opt_in_service_kt_proto_lite",
+    deps = [":opt_in_service_proto"],
 )
 
-proto_library(
-    name = "atoms_proto",
-    srcs = [
-        "atoms.proto",
-    ],
-    option_deps = ["//third_party/java/protobuf:java_features_proto"],
-    deps = [
-        ":enums_proto",
-    ],
-)
-
-java_lite_proto_library(
-    name = "enums_java_proto_lite",
-    deps = [":enums_proto"],
-)
-
-java_lite_proto_library(
-    name = "atoms_java_proto_lite",
-    deps = [":atoms_proto"],
-)
-
-android_library(
-    name = "api",
-    srcs = [
-        "PcsStatsLog.java",
-    ],
-    deps = [
-        ":atoms_java_proto_lite",
-    ],
+kt_jvm_grpc_library(
+    name = "opt_in_service_kt_grpc",
+    srcs = [":opt_in_service_proto"],
+    flavor = "lite",
+    deps = [":opt_in_service_kt_proto_lite"],
 )

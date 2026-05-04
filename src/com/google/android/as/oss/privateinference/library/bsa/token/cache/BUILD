@@ -73,6 +73,8 @@ android_library(
         "//src/com/google/android/as/oss/privateinference/config",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token",
         "//third_party/java/androidx/work",
+        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-jvm",
+        "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_flogger_google_extensions",
     ],
 )
@@ -94,6 +96,7 @@ android_library(
         "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-android",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
+        "@maven//:javax_inject_javax_inject",
     ],
 )
 
@@ -120,14 +123,18 @@ android_library(
         "//src/com/google/android/as/oss/common:annotation",
         "//src/com/google/android/as/oss/common/config",
         "//src/com/google/android/as/oss/common/time",
+        "//src/com/google/android/as/oss/logging:enums_kt_proto_lite",
         "//src/com/google/android/as/oss/privateinference/config",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token:token_provider",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token/cache/db",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token/cache/db:db_token_pool",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token/crypto",
+        "//src/com/google/android/as/oss/privateinference/logging",
+        "//src/com/google/android/as/oss/privateinference/service:logging_metric_id_qualifiers",
         "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-android",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
+        "@maven//:javax_inject_javax_inject",
     ],
 )

@@ -52,6 +52,14 @@ filegroup(
     ],
 )
 
+filegroup(
+    name = "public_keys_labs_proto",
+    srcs = ["res/raw/public_keys_labs_proto.binarypb"],
+    visibility = [
+        "//visibility:public",
+    ],
+)
+
 android_library(
     name = "private_inference_service_stub_factory",
     srcs = ["PrivateInferenceServiceStubFactory.kt"],
@@ -91,7 +99,6 @@ android_library(
         ":device_attestation_flag",
         ":private_inference_client_timer_names",
         ":private_inference_service_stub_factory",
-        ":public_keys_java_proto_lite",
         ":publisher_module",
         "//privacy/net/common/proto:spend_token_data_kt_proto_lite",
         "//src/com/google/android/as/oss/common:annotation",
@@ -146,7 +153,6 @@ android_library(
         "//third_party/oak/proto/attestation:verification_java_proto_lite",
         "//third_party/oak/proto/session:messages_kt_proto_lite",
         "//third_party/oak/proto/session:session_kt_proto_lite",
-        "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:com_google_protobuf_protobuf_javalite",
     ],
@@ -161,9 +167,6 @@ android_library(
         "//src/com/google/android/as/oss/common/time",
         "//src/com/google/android/as/oss/privateinference:annotations",
         "//third_party/oak/java/src/main/java/com/google/oak/session:attestation_publisher_android",
-        "//third_party/oak/proto/attestation:verification_java_proto_lite",
-        "//third_party/oak/proto/session:messages_kt_proto_lite",
-        "//third_party/oak/proto/session:session_kt_proto_lite",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
         "@maven//:com_google_flogger_google_extensions",
@@ -175,6 +178,39 @@ android_library(
     name = "private_inference_verification_keys_prod_module",
     srcs = [
         "PrivateInferenceVerificationKeysProdModule.java",
+    ],
+    manifest = "//src/com/google/android/as/oss/privateinference/library/oakutil:AndroidManifest.xml",
+    resource_files = glob(["res/**"]),
+    deps = [
+        ":public_keys_java_proto_lite",
+        "@maven//:com_google_dagger_dagger",
+        "@maven//:com_google_dagger_hilt-android",
+        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:javax_inject_javax_inject",
+    ],
+)
+
+android_library(
+    name = "private_inference_verification_keys_internal_module",
+    srcs = [
+        "PrivateInferenceVerificationKeysInternalModule.java",
+    ],
+    manifest = "//src/com/google/android/as/oss/privateinference/library/oakutil:AndroidManifest.xml",
+    resource_files = glob(["res/**"]),
+    deps = [
+        ":public_keys_java_proto_lite",
+        "//src/com/google/android/as/oss/privateinference:annotations",
+        "@maven//:com_google_dagger_dagger",
+        "@maven//:com_google_dagger_hilt-android",
+        "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:javax_inject_javax_inject",
+    ],
+)
+
+android_library(
+    name = "private_inference_verification_keys_labs_module",
+    srcs = [
+        "PrivateInferenceVerificationKeysLabsModule.java",
     ],
     manifest = "//src/com/google/android/as/oss/privateinference/library/oakutil:AndroidManifest.xml",
     resource_files = glob(["res/**"]),

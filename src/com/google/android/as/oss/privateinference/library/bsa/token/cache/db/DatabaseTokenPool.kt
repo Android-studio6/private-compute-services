@@ -17,6 +17,7 @@
 package com.google.android.`as`.oss.privateinference.library.bsa.token.cache.db
 
 import com.google.android.`as`.oss.common.time.TimeSource
+import com.google.android.`as`.oss.logging.PcsStatsEnums.ValueMetricId
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaToken
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaTokenParams
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaTokenWithoutChallenge
@@ -28,6 +29,7 @@ import com.google.android.`as`.oss.privateinference.library.bsa.token.ProxyToken
 import com.google.android.`as`.oss.privateinference.library.bsa.token.cache.TokenPool
 import com.google.android.`as`.oss.privateinference.library.bsa.token.cache.TokenPoolSource
 import com.google.android.`as`.oss.privateinference.library.bsa.token.crypto.BsaTokenCipher
+import com.google.android.`as`.oss.privateinference.logging.PcsStatsLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -56,6 +58,8 @@ import kotlinx.coroutines.sync.withLock
  * @param enableAsyncTokenCacheRefill If true, token cache refills will be performed asynchronously
  *   and will not block the calling thread.
  * @param coroutineScope [CoroutineScope] on which any coroutines will be run.
+ * @param pcsStatsLogger [PcsStatsLogger] Utility to log PAIC metrics.
+ * @param tokenUtilizationMetricId [ValueMetricId] metric ID to log the token utilization ratio.
  */
 class DatabaseTokenPool<T : BsaToken>(
   private val refreshParams: List<BsaTokenParams<T>>,
@@ -66,9 +70,14 @@ class DatabaseTokenPool<T : BsaToken>(
   private val timeSource: TimeSource,
   private val enableAsyncTokenCacheRefill: Boolean,
   private val coroutineScope: CoroutineScope,
+  private val pcsStatsLogger: PcsStatsLogger,
+  private val tokenUtilizationMetricId: ValueMetricId,
 ) : TokenPool<T> {
   private val dbLock = Mutex()
   private val refillLock = Mutex()
+  // The number of tokens drawn outside of the pool if the cache is empty. This is used to calculate
+  // the token utilization ratio and only applies to the asynchronous cache refill mode.
+  private var excessDrawCount = 0
 
   override suspend fun draw(
     params: BsaTokenParams<T>,
@@ -93,6 +102,7 @@ class DatabaseTokenPool<T : BsaToken>(
         resultTokens.addAll(
           fallbackSource(params, resultTokensNeeded, BsaTokenDao.tokenValidator(timeSource))
         )
+        excessDrawCount += resultTokensNeeded
       }
       // Asynchronously fetch tokens to refill the cache, if there isn't a refill already in
       // progress.
@@ -127,6 +137,9 @@ class DatabaseTokenPool<T : BsaToken>(
   override suspend fun clear() = dbLock.withLock { daoProvider().deleteAll(refreshParams) }
 
   override suspend fun refresh(refillSource: TokenPoolSource<T>) = dbLock.withLock {
+    pcsStatsLogger.logEventValue(tokenUtilizationMetricId, calculateUtilizationRatio())
+    // Reset the excess draw count during each refresh.
+    excessDrawCount = 0
     daoProvider().deleteAll(refreshParams)
     val toInsert = refreshParams.flatMap { params ->
       refillSource(params, preferredPoolSize, BsaTokenDao.tokenValidator(timeSource)).mapNotNull {
@@ -134,6 +147,14 @@ class DatabaseTokenPool<T : BsaToken>(
       }
     }
     daoProvider().insertAll(toInsert)
+  }
+
+  private suspend fun calculateUtilizationRatio(): Int {
+    check(dbLock.isLocked) { "calculateUtilizationRatio must be called within dbLock" }
+    val params = refreshParams.firstOrNull() ?: return 0
+    val drawCount = (preferredPoolSize - daoProvider().getPoolSize(params)) + excessDrawCount
+    val totalCount = preferredPoolSize + excessDrawCount
+    return if (totalCount == 0) 0 else (drawCount * 100) / totalCount
   }
 
   private suspend fun encrypt(params: BsaTokenParams<T>, token: T): BsaTokenEntity? {

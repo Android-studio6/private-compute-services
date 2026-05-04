@@ -17,17 +17,11 @@ load("@bazel_rules_android//android:rules.bzl", "android_library")
 package(default_visibility = ["//visibility:public"])
 
 android_library(
-    name = "impl",
-    srcs = glob(
-        ["*.java"],
-    ),
-    deps = [
-        "//src/com/google/android/as/oss/common",
-        "//src/com/google/android/as/oss/common/config",
-        "//src/com/google/android/as/oss/common/initializer",
-        "//src/com/google/android/as/oss/networkusage/config",
-        "@maven//:com_google_dagger_dagger",
-        "@maven//:com_google_dagger_hilt-android",
-        "@maven//:javax_inject_javax_inject",
+    name = "prod_modules",
+    tags = [
+        "keep_dep",
+    ],
+    exports = [
+        "//src/com/google/android/as/oss/features/optin/service:grpc_module",
     ],
 )

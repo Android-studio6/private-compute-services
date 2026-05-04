@@ -27,3 +27,7 @@ import kotlin.annotation.Retention
 @Qualifier @Retention(RUNTIME) annotation class FeatureNameToSuccessLatencyValueMetricIdMap
 
 @Qualifier @Retention(RUNTIME) annotation class FeatureNameToFailureLatencyValueMetricIdMap
+
+@Qualifier @Retention(RUNTIME) annotation class ProxyTokenUtilizationMetricId
+
+@Qualifier @Retention(RUNTIME) annotation class ArateaTokenUtilizationMetricId

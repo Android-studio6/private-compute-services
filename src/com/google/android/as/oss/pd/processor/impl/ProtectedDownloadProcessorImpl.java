@@ -34,6 +34,7 @@ import com.google.android.as.oss.pd.api.proto.GetManifestConfigResponse;
 import com.google.android.as.oss.pd.attestation.AttestationClient;
 import com.google.android.as.oss.pd.attestation.AttestationResponse;
 import com.google.android.as.oss.pd.channel.ChannelProvider;
+import com.google.android.as.oss.pd.channel.ChannelProvider.ChannelSpec;
 import com.google.android.as.oss.pd.config.IntegrityClientTokenProvider;
 import com.google.android.as.oss.pd.keys.EncryptionHelper;
 import com.google.android.as.oss.pd.keys.EncryptionHelperFactory;
@@ -134,7 +135,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
       return Futures.immediateFailedFuture(e);
     }
 
-    Channel channel =
+    ChannelSpec channelSpec =
         channelProvider.getChannel(request.getMetadata().getBlobConstraints().getClient());
 
     ContentBindingHashFunction contentBindingHashFunction =
@@ -147,7 +148,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
             state -> integrityCheck(state, contentBindingHashFunction, useVmKey, clientId),
             pdExecutor)
         .transformAsync(
-            integrityResponse -> downloadBlob(channel, clientId, request, integrityResponse),
+            integrityResponse -> downloadBlob(channelSpec, clientId, request, integrityResponse),
             pdExecutor)
         .transformAsync(this::finalizeDownload, pdExecutor);
   }
@@ -168,7 +169,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
       return Futures.immediateFailedFuture(e);
     }
 
-    Channel channel = channelProvider.getChannel(request.getConstraints().getClient());
+    ChannelSpec channelSpec = channelProvider.getChannel(request.getConstraints().getClient());
 
     ContentBindingHashFunction contentBindingHashFunction =
         keyBytes ->
@@ -179,7 +180,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
                 integrityCheck(state, contentBindingHashFunction, /* useVmKey= */ false, clientId),
             pdExecutor)
         .transformAsync(
-            state -> downloadManifestConfig(channel, clientId, request, state), pdExecutor)
+            state -> downloadManifestConfig(channelSpec, clientId, request, state), pdExecutor)
         .transformAsync(this::finalizeDownload, pdExecutor);
   }
 
@@ -291,7 +292,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
   }
 
   private ListenableFuture<DownloadResult<DownloadBlobResponse>> downloadBlob(
-      Channel channel,
+      ChannelSpec channelSpec,
       String clientId,
       DownloadBlobRequest request,
       IntegrityResponse integrityResponse)
@@ -299,8 +300,8 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
     ClientPersistentState finalClientPersistentState = integrityResponse.state();
     EncryptionHelper externalEncryption = integrityResponse.externalEncryption();
 
-    String apiKey = channelProvider.getServiceApiKeyOverride().orElse(request.getApiKey());
-    ProgramBlobServiceFutureStub serviceStub = createServiceStub(channel, apiKey);
+    String apiKey = channelSpec.apiKeyOverride().orElse(request.getApiKey());
+    ProgramBlobServiceFutureStub serviceStub = createServiceStub(channelSpec.channel(), apiKey);
 
     com.google.android.as.oss.pd.api.proto.Metadata metadata = request.getMetadata();
     logger.atInfo().log(
@@ -343,16 +344,16 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
   }
 
   private ListenableFuture<DownloadResult<GetManifestConfigResponse>> downloadManifestConfig(
-      Channel channel,
+      ChannelSpec channelSpec,
       String clientId,
       GetManifestConfigRequest request,
       IntegrityResponse integrityResponse)
       throws GeneralSecurityException, IOException {
     EncryptionHelper externalEncryption = integrityResponse.externalEncryption();
 
-    String apiKey = channelProvider.getServiceApiKeyOverride().orElse(request.getApiKey());
+    String apiKey = channelSpec.apiKeyOverride().orElse(request.getApiKey());
     ProtectedDownloadServiceFutureStub serviceStub =
-        createProtectedDownloadServiceStub(channel, apiKey);
+        createProtectedDownloadServiceStub(channelSpec.channel(), apiKey);
     logger.atInfo().log(
         "downloading manifest with public key hash %s.",
         externalEncryption.publicKeyHashForLogging());

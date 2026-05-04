@@ -23,10 +23,14 @@ import com.google.auto.value.AutoValue;
 public abstract class NetworkUsageLogConfig {
 
   public static Builder builder() {
-    return new AutoValue_NetworkUsageLogConfig.Builder().setNetworkUsageLogEnabled(false);
+    return new AutoValue_NetworkUsageLogConfig.Builder()
+        .setNetworkUsageLogEnabled(false)
+        .setNetworkUsageSearchIndexablesProviderEnabled(false);
   }
 
   public abstract boolean networkUsageLogEnabled();
+
+  public abstract boolean networkUsageSearchIndexablesProviderEnabled();
 
   public abstract boolean rejectUnknownRequests();
 
@@ -34,6 +38,8 @@ public abstract class NetworkUsageLogConfig {
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setNetworkUsageLogEnabled(boolean value);
+
+    public abstract Builder setNetworkUsageSearchIndexablesProviderEnabled(boolean value);
 
     public abstract Builder setRejectUnknownRequests(boolean value);
 

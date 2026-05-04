@@ -67,6 +67,7 @@ val NotificationIntelligencePolicy_FederatedCompute =
       "languageDetectionLatencyMillis" { rawUsage(UsageType.ANY) }
       "appProvidedClassifierLatencyMillis" { rawUsage(UsageType.ANY) }
       "defaultBundleLatencyMillis" { rawUsage(UsageType.ANY) }
+      "modelType" { rawUsage(UsageType.ANY) }
       "systemInfoId" { rawUsage(UsageType.JOIN) }
     }
 
